@@ -1,0 +1,25 @@
+{
+  "name": "konteiner",
+  "version": "1.0.0",
+  "description": "Simple DI container for node.js applications",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:petrmiko/konteiner.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test mocha --recursive './src/**/*.test.js'"
+  },
+  "keywords": [
+    "di",
+    "container"
+  ],
+  "author": "Petr Miko",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^6.0.1",
+    "mocha": "^6.1.4",
+    "sinon": "^7.3.2"
+  }
+}
