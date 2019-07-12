@@ -1,7 +1,7 @@
 const NO_DEPS = 'no-deps'
 
 /**
- * @typedef {import('./ref')} Ref 
+ * @typedef {import('./ref')} Ref
  */
 
 class RefMap {
@@ -12,7 +12,7 @@ class RefMap {
 	}
 
 	/**
-	 * @param {Ref} ref 
+	 * @param {Ref} ref
 	 */
 	add(ref) {
 		const dependenciesNames = ref.getDependenciesNames()
@@ -28,12 +28,12 @@ class RefMap {
 	}
 
 	/**
-	 * @param {string[]} searchStack 
+	 * @param {string[]} searchStack
 	 */
 	checkDependenciesIntegrity(searchStack) {
 		const refName = searchStack.pop()
 		const ref = this.refs.get(refName)
-		
+
 		if (!ref) throw new Error(`Dependency "${refName}" is not registered`)
 
 		const dependenciesNames = ref.getDependenciesNames()
@@ -64,11 +64,15 @@ class RefMap {
 		return this.refs.delete(refName)
 	}
 
+	/**
+	 * @typedef {import('./ref').SimpleRef} SimpleRef
+	 * @returns {Map<SimpleRef, SimpleRef[]}
+	 */
 	getProvisionStructure() {
 		return Array.from(this.refMap.entries()).reduce((acc, [refName, depsNames]) => {
 			const ref = this.refs.get(refName) && this.refs.get(refName).simple()
 			acc.set(
-				ref, 
+				ref,
 				depsNames
 					? Array.from(depsNames).map((depName) => this.refs.get(depName) && this.refs.get(depName).simple())
 					: []

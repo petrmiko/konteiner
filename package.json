@@ -8,7 +8,8 @@
     "url": "git+ssh://git@github.com:petrmiko/konteiner.git"
   },
   "scripts": {
-    "test": "NODE_ENV=test mocha --recursive './src/**/*.test.js'"
+    "test": "NODE_ENV=test mocha --recursive './src/**/*.test.js'",
+    "test:coverage": "nyc --reporter=lcovonly --report-dir=coverage npm run test && nyc report"
   },
   "keywords": [
     "di",
@@ -21,12 +22,13 @@
     "eslint": "^6.0.1",
     "husky": "^3.0.0",
     "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
     "sinon": "^7.3.2"
   },
   "husky": {
     "hooks": {
       "pre-commit": "eslint .",
-      "pre-push": "npm run test"
+      "pre-push": "npm run test:coverage"
     }
   }
 }

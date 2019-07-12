@@ -13,10 +13,13 @@ module.exports = {
 		'ecmaVersion': 2018
 	},
 	'rules': {
+		'eol-last': ['error', 'always'],
 		'indent': [ 'error', 'tab' ],
 		'linebreak-style': [ 'error', 'unix' ],
+		'no-trailing-spaces': ['error'],
 		'prefer-const': 'error',
 		'quotes': [ 'error', 'single' ],
-		'semi': [ 'error', 'never' ]
+		'semi': [ 'error', 'never' ],
+		'space-before-function-paren': ['error', 'never']
 	}
 }

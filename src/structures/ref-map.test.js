@@ -5,14 +5,14 @@ const sinon = require('sinon')
 const Ref = require('./ref')
 const RefMap = require('./ref-map')
 
-describe('RefMap', function () {
+describe('RefMap', function() {
 
-	describe('add', function () {
-		it('Stores reference and updates its dependencies refs by existing mapping', function (){
+	describe('add', function() {
+		it('Stores reference and updates its dependencies refs by existing mapping', function(){
 			const refMap = new RefMap()
 
 			const Logger = {log: sinon.spy()}
-			const Messenger = function (logger) {
+			const Messenger = function(logger) {
 				return {
 					sendMessage(text) {logger.log(text)}
 				}
@@ -39,14 +39,14 @@ describe('RefMap', function () {
 		})
 	})
 
-	describe('get', function () {
-		it('Throws error when no such dependency', function () {
+	describe('get', function() {
+		it('Throws error when no such dependency', function() {
 			const refMap = new RefMap()
 
 			assert.throws(() => refMap.get('unregisteredDependency'), 'Dependency "unregisteredDependency" is not registered')
 		})
 
-		it('Throws error when found cyclic dependency upon get', function () {
+		it('Throws error when found cyclic dependency upon get', function() {
 			const refMap = new RefMap()
 
 			const a = (b) => {} //eslint-disable-line no-unused-vars

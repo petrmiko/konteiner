@@ -6,8 +6,8 @@ const Ref = require('./ref')
 
 describe('Ref', function() {
 
-	describe('No init dependency', function () {
-		it('Provides string value as received', function () {
+	describe('No init dependency', function() {
+		it('Provides string value as received', function() {
 			const STRING = '{testString}'
 			const ref = new Ref('{refName}', STRING)
 
@@ -16,7 +16,7 @@ describe('Ref', function() {
 			assert.strictEqual(ref.getInstance(), STRING)
 		})
 
-		it('Provides number value as received', function () {
+		it('Provides number value as received', function() {
 			const NUMBER = 42
 			const ref = new Ref('{refName}', NUMBER)
 
@@ -25,7 +25,7 @@ describe('Ref', function() {
 			assert.strictEqual(ref.getInstance(), NUMBER)
 		})
 
-		it('Provides object value as received', function () {
+		it('Provides object value as received', function() {
 			const CONFIG = {
 				someValue: 1,
 				anotherValue: 2,
@@ -44,7 +44,7 @@ describe('Ref', function() {
 			const CALLABLE = () => IMPLEMENTATION
 
 			const ref = new Ref('{callable}', CALLABLE)
-			
+
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
@@ -53,9 +53,9 @@ describe('Ref', function() {
 			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
 		})
 
-		it('Provides correct dependencies names', function () {
+		it('Provides correct dependencies names', function() {
 			const CALLABLE = (dep1, dep2, dep3, dep4) => {} //eslint-disable-line no-unused-vars
-			
+
 			const ref = new Ref('{callable}', CALLABLE)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})
@@ -112,13 +112,13 @@ describe('Ref', function() {
 
 	describe('Constructible dependency - common function', function() {
 		it('Is lazy initialized', function() {
-			const CONSTRUCTIBLE = function() { 
+			const CONSTRUCTIBLE = function() {
 				const someFn = function() { return '{value}'}
 				return {someFn}
 			}
 
 			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-			
+
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
@@ -127,15 +127,15 @@ describe('Ref', function() {
 			assert.equal(ref.getInstance().someFn(), '{value}')
 		})
 
-		it('Provides correct dependencies names', function () {
-			const CONSTRUCTIBLE = function (dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
-			
+		it('Provides correct dependencies names', function() {
+			const CONSTRUCTIBLE = function(dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
+
 			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})
 
 		it('Throws error, when not registered dependency instance', function() {
-			const CONSTRUCTIBLE = function (unfulfilledDep) {
+			const CONSTRUCTIBLE = function(unfulfilledDep) {
 				unfulfilledDep.doSomething()
 			}
 			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
@@ -194,7 +194,7 @@ describe('Ref', function() {
 			}
 
 			const ref = new Ref('{constructible}', Constructible)
-			
+
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
@@ -204,11 +204,11 @@ describe('Ref', function() {
 			assert.equal(ref.getInstance().someFn(), '{value}')
 		})
 
-		it('Provides correct dependencies names', function () {
+		it('Provides correct dependencies names', function() {
 			class Constructible {
 				constructor(dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
 			}
-			
+
 			const ref = new Ref('{constructible}', Constructible)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})

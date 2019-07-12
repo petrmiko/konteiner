@@ -4,7 +4,7 @@ const sinon = require('sinon')
 const Konteiner = require('./konteiner')
 
 describe('Konteiner', function() {
-	
+
 
 	it('Arrow function dependency', function() {
 		const TEST_MESSAGE = '{testMessage}'
@@ -16,7 +16,7 @@ describe('Konteiner', function() {
 
 		const Messenger = (logger) => ({
 			/**
-			 * @param {string} message 
+			 * @param {string} message
 			 */
 			sendMessage(message) {
 				logger.log(message)
@@ -26,7 +26,7 @@ describe('Konteiner', function() {
 		const konteiner = new Konteiner()
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
-		
+
 		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
 		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
@@ -37,15 +37,15 @@ describe('Konteiner', function() {
 		const TEST_MESSAGE = '{testMessage}'
 		const LOGGER_FN = sinon.spy()
 
-		const Logger = function () {
+		const Logger = function() {
 			return {log: LOGGER_FN}
 		}
 
-		const Messenger = function (logger) {
+		const Messenger = function(logger) {
 
 			return {
 				/**
-				 * @param {string} message 
+				 * @param {string} message
 				 */
 				sendMessage(message) {
 					logger.log(message)
@@ -57,7 +57,7 @@ describe('Konteiner', function() {
 		const konteiner = new Konteiner()
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
-		
+
 		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
 		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
@@ -68,15 +68,15 @@ describe('Konteiner', function() {
 		const TEST_MESSAGE = '{testMessage}'
 		const LOGGER_FN = sinon.spy()
 
-		const Logger = function logger () {
+		const Logger = function logger() {
 			return {log: LOGGER_FN}
 		}
 
-		const Messenger = function messenger (logger) {
+		const Messenger = function messenger(logger) {
 
 			return {
 				/**
-				 * @param {string} message 
+				 * @param {string} message
 				 */
 				sendMessage(message) {
 					logger.log(message)
@@ -88,7 +88,7 @@ describe('Konteiner', function() {
 		const konteiner = new Konteiner()
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
-		
+
 		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
 		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
@@ -106,12 +106,12 @@ describe('Konteiner', function() {
 		}
 
 		class Messenger  {
-			constructor (logger) {
+			constructor(logger) {
 				this.logger = logger
 			}
 
 			/**
-			 * @param {string} message 
+			 * @param {string} message
 			 */
 			sendMessage(message) {
 				this.logger.log(message)
@@ -121,7 +121,7 @@ describe('Konteiner', function() {
 		const konteiner = new Konteiner()
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
-		
+
 		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
 		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)

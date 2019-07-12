@@ -8,15 +8,15 @@ class Konteiner {
 	}
 
 	/**
-	 * @param {string} depName dependency name 
-	 * @param {Function} implementation 
+	 * @param {string} depName dependency name
+	 * @param {Function} implementation
 	 */
 	register(depName, implementation) {
 		this.refMap.add(new Ref(depName, implementation))
 	}
 
 	/**
-	 * @param {string} depName 
+	 * @param {string} depName
 	 */
 	get(depName) {
 		const ref = this.refMap.get(depName)
@@ -25,7 +25,7 @@ class Konteiner {
 	}
 
 	/**
-	 * @typedef {{name: string, type: string, initialized: string}} SimpleRef
+	 * @typedef {import('./structures/ref').SimpleRef} SimpleRef
 	 * @returns {Map<SimpleRef, SimpleRef[]}
 	 */
 	getDependenciesProvisionStructure() {

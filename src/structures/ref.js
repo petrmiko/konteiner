@@ -10,11 +10,14 @@ const INIT_TYPE = {
 /**
  * @template DependencyInstance
  */
+/**
+ * @typedef {{name: string, type: string, initialized: boolean}} SimpleRef
+ */
 module.exports = class Ref {
 
 	/**
 	 * @param {string} name
-	 * @param {DependencyInstance|function(any...):DependencyInstance} implementation 
+	 * @param {DependencyInstance|function(any...):DependencyInstance} implementation
 	 */
 	constructor(name, implementation) {
 		this.name = name
@@ -23,7 +26,7 @@ module.exports = class Ref {
 
 		if (typeof implementation === 'function') {
 			this.initialized = false
-			this.type = 
+			this.type =
 				!!implementation.prototype && implementation.prototype.constructor.name != null
 					? INIT_TYPE.CONSTRUCTIBLE
 					: INIT_TYPE.CALLABLE
@@ -98,7 +101,7 @@ module.exports = class Ref {
 	}
 
 	/**
-	 * @param {Map<string, DependencyInstance>} dependenciesRefs 
+	 * @param {Map<string, DependencyInstance>} dependenciesRefs
 	 */
 	updateDependenciesRefs(dependenciesRefs) {
 		this.dependenciesRefs.forEach((_, dependencyName) => {
@@ -107,7 +110,7 @@ module.exports = class Ref {
 	}
 
 	/**
-	 * @returns {name: string, type: string, initialized: boolean}
+	 * @returns {SimpleRef}
 	 */
 	simple() {
 		const {name, type, initialized} = this
