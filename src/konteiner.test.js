@@ -27,8 +27,8 @@ describe('Konteiner', function() {
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
 		
-		const retrievedMessanger = /** @type {Messanger}*/ (konteiner.get('messenger'))
-		retrievedMessanger.sendMessage(TEST_MESSAGE)
+		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
+		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
 		sinon.assert.calledWithExactly(LOGGER_FN, TEST_MESSAGE)
 	})
@@ -58,8 +58,8 @@ describe('Konteiner', function() {
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
 		
-		const retrievedMessanger = /** @type {Messanger}*/ (konteiner.get('messenger'))
-		retrievedMessanger.sendMessage(TEST_MESSAGE)
+		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
+		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
 		sinon.assert.calledWithExactly(LOGGER_FN, TEST_MESSAGE)
 	})
@@ -89,8 +89,8 @@ describe('Konteiner', function() {
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
 		
-		const retrievedMessanger = /** @type {Messanger}*/ (konteiner.get('messenger'))
-		retrievedMessanger.sendMessage(TEST_MESSAGE)
+		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
+		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
 		sinon.assert.calledWithExactly(LOGGER_FN, TEST_MESSAGE)
 	})
@@ -122,8 +122,8 @@ describe('Konteiner', function() {
 		konteiner.register('logger', Logger)
 		konteiner.register('messenger', Messenger)
 		
-		const retrievedMessanger = /** @type {Messanger}*/ (konteiner.get('messenger'))
-		retrievedMessanger.sendMessage(TEST_MESSAGE)
+		const retrievedMessenger = /** @type {Messenger}*/ (konteiner.get('messenger'))
+		retrievedMessenger.sendMessage(TEST_MESSAGE)
 		sinon.assert.calledOnce(LOGGER_FN)
 		sinon.assert.calledWithExactly(LOGGER_FN, TEST_MESSAGE)
 	})
