@@ -22,9 +22,9 @@ class RefMap {
 			if (!this.refMap.get(name)) this.refMap.set(name, new Set())
 			this.refMap.get(name).add(ref.getName())
 		})
-
-		ref.updateDependenciesRefs(this.refs)
 		this.refs.set(ref.getName(), ref)
+
+		this.refs.forEach((ref) => ref.updateDependenciesRefs(this.refs))
 	}
 
 	/**

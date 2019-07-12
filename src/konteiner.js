@@ -1,18 +1,40 @@
+const fsHelper = require('./helpers/fs-helper')
+
 const Ref = require('./structures/ref')
 const RefMap = require('./structures/ref-map')
 
 class Konteiner {
 
-	constructor() {
+	/**
+	 * @param {?{exclude?: Array<string>}} options
+	 */
+	constructor(options = {}) {
 		this.refMap = new RefMap()
+
+		this.exclude = options.exclude || options.skipFiles || []
 	}
 
 	/**
 	 * @param {string} depName dependency name
-	 * @param {Function} implementation
+	 * @param {any} implementation
 	 */
 	register(depName, implementation) {
 		this.refMap.add(new Ref(depName, implementation))
+	}
+
+	/**
+	 * @param {string} path
+	 * @param {?{exclude?: Array<string|RegExp>}} options
+	 */
+	registerPath(path, options = {}) {
+		const exclude = options.exclude || options.skipFiles || this.exclude
+		const files = fsHelper.getFileListSync(path)
+		const filesMap = fsHelper.transformFileListToDependenciesMap(files, exclude)
+
+		filesMap.forEach((path, dependencyName) => {
+			const implementation = require(path)
+			this.register(dependencyName, implementation)
+		})
 	}
 
 	/**
