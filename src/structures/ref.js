@@ -1,5 +1,8 @@
 
-const DEPS_PARSE_REGEX = /\((.*?)\)/
+const COMMON_FN_DEPS_PARSE_REGEX = /function.*?\((.*?)\)/
+const ARROW_FN_DEPS_PARSE_REGEX = /\((.*?)\)\W?=>/
+const CLASS_FN_DEPS_PARSE_REGEX = /constructor\W?\((.*?)\)/
+const JSDOC_RM_REGEX = /\/\*[\s\S]*?\*\//g
 
 const INIT_TYPE = {
 	NO_INIT: 'No-init',
@@ -11,16 +14,18 @@ const INIT_TYPE = {
  * @template DependencyInstance
  */
 /**
- * @typedef {{name: string, type: string, initialized: boolean}} SimpleRef
+ * @typedef {{name: string, type: string, path: string, initialized: boolean}} SimpleRef
  */
 module.exports = class Ref {
 
 	/**
 	 * @param {string} name
 	 * @param {DependencyInstance|function(any...):DependencyInstance} implementation
+	 * @param {?string} path
 	 */
-	constructor(name, implementation) {
+	constructor(name, implementation, path) {
 		this.name = name
+		this.path = path
 		this.implementation = implementation
 		this.dependenciesRefs = /** @type {Map<string, Ref>} */ (new Map())
 
@@ -31,19 +36,23 @@ module.exports = class Ref {
 					? INIT_TYPE.CONSTRUCTIBLE
 					: INIT_TYPE.CALLABLE
 
-			const implementationString = implementation.toString()
-			const argsMatch = implementationString.match(DEPS_PARSE_REGEX)
+			const implementationString = implementation.toString().replace(JSDOC_RM_REGEX, '')
+			const argsMatch = this.type === INIT_TYPE.CALLABLE
+				? implementationString.match(ARROW_FN_DEPS_PARSE_REGEX)
+				: implementationString.match(COMMON_FN_DEPS_PARSE_REGEX) || implementationString.match(CLASS_FN_DEPS_PARSE_REGEX)
 			const argsString = Array.isArray(argsMatch) ? argsMatch[1] : '' // constructor must not be defined explicitly
 
-			argsString
+			this.dependenciesNames = argsString
 				.replace(/\s+/g, '')
 				.split(',')
 				.filter(Boolean)
-				.forEach((dependencyName) => this.dependenciesRefs.set(dependencyName, undefined))
+
+			this.dependenciesNames.forEach((dependencyName) => this.dependenciesRefs.set(dependencyName, undefined))
 		} else {
 			this.initialized = true
 			this.instance = implementation
 			this.type = INIT_TYPE.NO_INIT
+			this.dependenciesNames = []
 		}
 	}
 
@@ -51,7 +60,7 @@ module.exports = class Ref {
 	 * @returns {Array<string>}
 	 */
 	getDependenciesNames() {
-		return Array.from(this.dependenciesRefs.keys())
+		return this.dependenciesNames
 	}
 
 	/**
@@ -78,7 +87,9 @@ module.exports = class Ref {
 			.filter(([, ref]) => ref == null)
 			.map(([dependencyName]) => dependencyName)
 
-		if (missingDependencies.length) throw new Error(`Missing dependencies! ${JSON.stringify(missingDependencies)}`)
+		if (missingDependencies.length) {
+			throw new Error(`Missing dependencies! ${JSON.stringify(missingDependencies)}`)
+		}
 
 		this.dependenciesRefs.forEach((ref) => {
 			if (!ref.isInitialized()) ref.initialize()
@@ -104,7 +115,7 @@ module.exports = class Ref {
 	 * @param {Map<string, DependencyInstance>} dependenciesRefs
 	 */
 	updateDependenciesRefs(dependenciesRefs) {
-		this.dependenciesRefs.forEach((_, dependencyName) => {
+		this.dependenciesNames.forEach((dependencyName) => {
 			this.dependenciesRefs.set(dependencyName, dependenciesRefs.get(dependencyName))
 		})
 	}
@@ -113,7 +124,7 @@ module.exports = class Ref {
 	 * @returns {SimpleRef}
 	 */
 	simple() {
-		const {name, type, initialized} = this
-		return {name, type, initialized}
+		const {name, type, path, initialized} = this
+		return {name, type, path, initialized}
 	}
 }

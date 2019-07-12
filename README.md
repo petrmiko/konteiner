@@ -44,6 +44,7 @@ konteiner.registerPath('./src', {exclude: [
 
 const someService = konteiner.get('someService') // all dependencies bound to someService will be now initialized
 ...
+```
 
 ## Notes
 This is an alpha version - there might be and probably are bugs, despite the few tests written.

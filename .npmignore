@@ -4,6 +4,7 @@ node_modules
 coverage
 
 # additional ignores for NPM
+.vscode
 **/*.test.js
 .nvmrc
 .eslintrc.js
