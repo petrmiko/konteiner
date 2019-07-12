@@ -13,10 +13,13 @@ const INIT_TYPE = {
 module.exports = class Ref {
 
 	/**
+	 * @param {string} name
 	 * @param {DependencyInstance|function(any...):DependencyInstance} implementation 
 	 */
-	constructor(implementation) {
+	constructor(name, implementation) {
+		this.name = name
 		this.implementation = implementation
+		this.dependenciesRefs = /** @type {Map<string, Ref>} */ (new Map())
 
 		if (typeof implementation === 'function') {
 			this.initialized = false
@@ -29,10 +32,11 @@ module.exports = class Ref {
 			const argsMatch = implementationString.match(DEPS_PARSE_REGEX)
 			const argsString = Array.isArray(argsMatch) ? argsMatch[1] : '' // constructor must not be defined explicitly
 
-			this.dependenciesNames = argsString
+			argsString
 				.replace(/\s+/g, '')
 				.split(',')
 				.filter(Boolean)
+				.forEach((dependencyName) => this.dependenciesRefs.set(dependencyName, undefined))
 		} else {
 			this.initialized = true
 			this.instance = implementation
@@ -44,7 +48,7 @@ module.exports = class Ref {
 	 * @returns {Array<string>}
 	 */
 	getDependenciesNames() {
-		return this.dependenciesNames || []
+		return Array.from(this.dependenciesRefs.keys())
 	}
 
 	/**
@@ -55,28 +59,34 @@ module.exports = class Ref {
 	}
 
 	/**
-	 * @param {Map<string, DependencyInstance>} dependenciesRefs
+	 * @returns {string}
+	 */
+	getName() {
+		return this.name
+	}
+
+	/**
 	 * @returns {void}
 	 */
-	initialize(dependenciesRefs) {
+	initialize() {
 		if (this.instance) return this.instance
 
-		const usedDependencies = this.dependenciesNames
-			.reduce((acc, depName) => {
-				const dependencyRef = dependenciesRefs.get(depName)
-				acc.set(depName, dependencyRef && dependencyRef.getInstance())
-				return acc
-			}, new Map())
-
-		const missingDependencies = Array.from(usedDependencies.entries())
-			.filter(([, dependency]) => dependency == null)
+		const missingDependencies = Array.from(this.dependenciesRefs.entries())
+			.filter(([, ref]) => ref == null)
 			.map(([dependencyName]) => dependencyName)
 
 		if (missingDependencies.length) throw new Error(`Missing dependencies! ${JSON.stringify(missingDependencies)}`)
 
+		this.dependenciesRefs.forEach((ref) => {
+			if (!ref.isInitialized()) ref.initialize()
+		})
+
+		const dependenciesInstances = Array.from(this.dependenciesRefs.values())
+			.map((ref) => ref.getInstance())
+
 		this.instance = this.type === INIT_TYPE.CONSTRUCTIBLE
-			? new this.implementation(...usedDependencies.values())
-			: this.implementation(...usedDependencies.values())
+			? new this.implementation(...dependenciesInstances)
+			: this.implementation(...dependenciesInstances)
 		this.initialized = true
 	}
 
@@ -85,5 +95,22 @@ module.exports = class Ref {
 	 */
 	isInitialized() {
 		return this.initialized
+	}
+
+	/**
+	 * @param {Map<string, DependencyInstance>} dependenciesRefs 
+	 */
+	updateDependenciesRefs(dependenciesRefs) {
+		this.dependenciesRefs.forEach((_, dependencyName) => {
+			this.dependenciesRefs.set(dependencyName, dependenciesRefs.get(dependencyName))
+		})
+	}
+
+	/**
+	 * @returns {name: string, type: string, initialized: boolean}
+	 */
+	simple() {
+		const {name, type, initialized} = this
+		return {name, type, initialized}
 	}
 }

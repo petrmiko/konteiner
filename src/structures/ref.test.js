@@ -9,7 +9,7 @@ describe('Ref', function() {
 	describe('No init dependency', function () {
 		it('Provides string value as received', function () {
 			const STRING = '{testString}'
-			const ref = new Ref(STRING)
+			const ref = new Ref('{refName}', STRING)
 
 			assert.isTrue(ref.isInitialized())
 			assert.isEmpty(ref.getDependenciesNames())
@@ -18,7 +18,7 @@ describe('Ref', function() {
 
 		it('Provides number value as received', function () {
 			const NUMBER = 42
-			const ref = new Ref(NUMBER)
+			const ref = new Ref('{refName}', NUMBER)
 
 			assert.isTrue(ref.isInitialized())
 			assert.isEmpty(ref.getDependenciesNames())
@@ -30,7 +30,7 @@ describe('Ref', function() {
 				someValue: 1,
 				anotherValue: 2,
 			}
-			const ref = new Ref(CONFIG)
+			const ref = new Ref('{refName}', CONFIG)
 
 			assert.isTrue(ref.isInitialized())
 			assert.isEmpty(ref.getDependenciesNames())
@@ -43,7 +43,7 @@ describe('Ref', function() {
 			const IMPLEMENTATION = '{someImplementation}'
 			const CALLABLE = () => IMPLEMENTATION
 
-			const ref = new Ref(CALLABLE)
+			const ref = new Ref('{callable}', CALLABLE)
 			
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
@@ -56,7 +56,7 @@ describe('Ref', function() {
 		it('Provides correct dependencies names', function () {
 			const CALLABLE = (dep1, dep2, dep3, dep4) => {} //eslint-disable-line no-unused-vars
 			
-			const ref = new Ref(CALLABLE)
+			const ref = new Ref('{callable}', CALLABLE)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})
 
@@ -64,24 +64,8 @@ describe('Ref', function() {
 			const CALLABLE = (unfulfilledDep) => {
 				unfulfilledDep.doSomething()
 			}
-			const ref = new Ref(CALLABLE)
+			const ref = new Ref('{callable}', CALLABLE)
 			const dependenciesRefs = new Map()
-			try {
-				ref.initialize(dependenciesRefs)
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Throws error, when not initialized dependency instance', function() {
-			const CALLABLE = (unfulfilledDep) => {
-				unfulfilledDep.doSomething()
-			}
-			const ref = new Ref(CALLABLE)
-			const dependenciesRefs = new Map([
-				['unfulfilledDep', new Ref(() => {})],
-			])
 			try {
 				ref.initialize(dependenciesRefs)
 				assert.fail()
@@ -98,25 +82,26 @@ describe('Ref', function() {
 				return IMPLEMENTATION
 			}
 
-			const ref = new Ref(CALLABLE)
+			const ref = new Ref('{callable}', CALLABLE)
 
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref(() => dep1)
+			const dep1Ref = new Ref('dep1', () => dep1)
 			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref(() => dep2)
+			const dep2Ref = new Ref('dep2', () => dep2)
 			dep2Ref.initialize()
 
 			const dependenciesRefs = new Map([
-				['dep1', dep1Ref],
-				['dep2', dep2Ref],
+				[dep1Ref.getName(), dep1Ref],
+				[dep2Ref.getName(), dep2Ref],
 			])
 
-			ref.initialize(dependenciesRefs)
+			ref.updateDependenciesRefs(dependenciesRefs)
+			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())
 			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
@@ -132,7 +117,7 @@ describe('Ref', function() {
 				return {someFn}
 			}
 
-			const ref = new Ref(CONSTRUCTIBLE)
+			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
 			
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
@@ -145,7 +130,7 @@ describe('Ref', function() {
 		it('Provides correct dependencies names', function () {
 			const CONSTRUCTIBLE = function (dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
 			
-			const ref = new Ref(CONSTRUCTIBLE)
+			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})
 
@@ -153,24 +138,8 @@ describe('Ref', function() {
 			const CONSTRUCTIBLE = function (unfulfilledDep) {
 				unfulfilledDep.doSomething()
 			}
-			const ref = new Ref(CONSTRUCTIBLE)
+			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
 			const dependenciesRefs = new Map()
-			try {
-				ref.initialize(dependenciesRefs)
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Throws error, when not initialized dependency instance', function() {
-			const CONSTRUCTIBLE = function (unfulfilledDep) {
-				unfulfilledDep.doSomething()
-			}
-			const ref = new Ref(CONSTRUCTIBLE)
-			const dependenciesRefs = new Map([
-				['unfulfilledDep', new Ref(function() {})],
-			])
 			try {
 				ref.initialize(dependenciesRefs)
 				assert.fail()
@@ -188,25 +157,26 @@ describe('Ref', function() {
 				return {someFn}
 			}
 
-			const ref = new Ref(CONSTRUCTIBLE)
+			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
 
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref(function() { return dep1})
+			const dep1Ref = new Ref('dep1', function() { return dep1})
 			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref(function() { return dep2})
+			const dep2Ref = new Ref('dep2', function() { return dep2})
 			dep2Ref.initialize()
 
 			const dependenciesRefs = new Map([
-				['dep1', dep1Ref],
-				['dep2', dep2Ref],
+				[dep1Ref.getName(), dep1Ref],
+				[dep2Ref.getName(), dep2Ref],
 			])
 
-			ref.initialize(dependenciesRefs)
+			ref.updateDependenciesRefs(dependenciesRefs)
+			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
@@ -223,7 +193,7 @@ describe('Ref', function() {
 				someFn() { return '{value}' }
 			}
 
-			const ref = new Ref(Constructible)
+			const ref = new Ref('{constructible}', Constructible)
 			
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
@@ -239,7 +209,7 @@ describe('Ref', function() {
 				constructor(dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
 			}
 			
-			const ref = new Ref(Constructible)
+			const ref = new Ref('{constructible}', Constructible)
 			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
 		})
 
@@ -249,26 +219,8 @@ describe('Ref', function() {
 					unfulfilledDep.doSomething()
 				}
 			}
-			const ref = new Ref(Constructible)
+			const ref = new Ref('{constructible}', Constructible)
 			const dependenciesRefs = new Map()
-			try {
-				ref.initialize(dependenciesRefs)
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Throws error, when not initialized dependency instance', function() {
-			class Constructible {
-				constructor(unfulfilledDep) {
-					unfulfilledDep.doSomething()
-				}
-			}
-			const ref = new Ref(Constructible)
-			const dependenciesRefs = new Map([
-				['unfulfilledDep', new Ref(class UnfulfilledDep {})],
-			])
 			try {
 				ref.initialize(dependenciesRefs)
 				assert.fail()
@@ -287,25 +239,26 @@ describe('Ref', function() {
 				someFn() { return '{value}'}
 			}
 
-			const ref = new Ref(Constructible)
+			const ref = new Ref('constructible', Constructible)
 
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref(() => dep1)
+			const dep1Ref = new Ref('dep1', () => dep1)
 			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref(() => dep2)
+			const dep2Ref = new Ref('dep2', () => dep2)
 			dep2Ref.initialize()
 
 			const dependenciesRefs = new Map([
-				['dep1', dep1Ref],
-				['dep2', dep2Ref],
+				[dep1Ref.getName(), dep1Ref],
+				[dep2Ref.getName(),  dep2Ref],
 			])
 
-			ref.initialize(dependenciesRefs)
+			ref.updateDependenciesRefs(dependenciesRefs)
+			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
