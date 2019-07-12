@@ -180,7 +180,6 @@ describe('Ref', function() {
 		})
 
 		it('Provides initialized instance by dependencies', function() {
-			const IMPLEMENTATION = '{someImplementation}'
 			const CONSTRUCTIBLE = function(dep1, dep2) {
 				dep1.doSomething()
 				dep2.doSomethingElse()
