@@ -1,0 +1,9 @@
+# .gitignore content
+node_modules
+.nyc_output
+coverage
+
+# additional ignores for NPM
+**/*.test.js
+.nvmrc
+.eslintrc.js

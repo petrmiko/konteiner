@@ -1,3 +1,4 @@
+# if you ignore something, add it to .npmignore as well!
 node_modules
 .nyc_output
 coverage
