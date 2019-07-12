@@ -5,12 +5,13 @@ const Ref = require('./structures/ref')
 const RefMap = require('./structures/ref-map')
 
 /**
- * @typedef {{
- * 	exclude: Array<string>,
- * 	prefix: string,
- * 	suffix: string,
- * 	tags:Array<string>,
- * }} RegisterOptions
+ * @typedef RegisterPathOptions
+ * @property {[Array<string>]} exclude excludes files during  call by pattern
+ * @property {[number]} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
+ * 	1 = only current (default), -1 = all the way down
+ * @property {[Array<string>]} supportedAutofixExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
+ * @property {[string]} prefix string to prefix loaded dependecies names
+ * @property {[string]} suffix string to suffix loaded dependecies names
  */
 
 /**
@@ -45,7 +46,7 @@ class Konteiner {
 	/**
 	 * @param {string} depName dependency name
 	 * @param {any} implementation
-	 * @param {?RegisterOptions} options
+	 * @param {?RegisterPathOptions} options
 	 */
 	register(depName, implementation, options = {}) {
 		const {prefix, suffix, tags} = options
@@ -55,14 +56,13 @@ class Konteiner {
 
 	/**
 	 * @param {string} path
-	 * @param {?RegisterOptions} options
+	 * @param {?RegisterPathOptions} options
 	 */
 	registerPath(path, options = {}) {
 		const exclude = options.exclude || options.skipFiles || this.exclude
-		const files = fsHelper.getFileListSync(path, [], {
-			supportedAutofixExtensions: this.supportedAutofixExtensions,
-			searchDepth: this.searchDepth,
-		})
+		const searchDepth = options.dirSearchDepth || this.searchDepth
+		const supportedAutofixExtensions = options.supportedAutofixExtensions || this.supportedAutofixExtensions
+		const files = fsHelper.getFileListSync(path, [], {supportedAutofixExtensions, searchDepth})
 		const filesMap = fsHelper.transformFileListToDependenciesMap(files, exclude)
 
 		filesMap.forEach((path, depName) => {
