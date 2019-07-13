@@ -46,5 +46,4 @@ const someService = konteiner.get('someService') // all dependencies bound to so
 ...
 ```
 
-## Notes
-This is an alpha version - there might be and probably are bugs, despite the few tests written.
+For more details, see [API section](./docs/api.md).

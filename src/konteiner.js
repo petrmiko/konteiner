@@ -81,6 +81,10 @@ class Konteiner {
 		return ref.getInstance()
 	}
 
+	/**
+	 * @param {string} tagName
+	 * @returns {any[]}
+	 */
 	getByTag(tagName) {
 		const refs = this.refMap.getByTag(tagName)
 		refs.map((ref) => {
