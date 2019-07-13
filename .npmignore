@@ -5,6 +5,7 @@ coverage
 
 # additional ignores for NPM
 .vscode
+test
 **/*.test.js
 .nvmrc
 .eslintrc.js
