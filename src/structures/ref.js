@@ -1,3 +1,4 @@
+const KonteinerMissingDependenciesError = require('../errors/missing-deps-error')
 
 const COMMON_FN_DEPS_PARSE_REGEX = /function.*?\((.*?)\)/
 const ARROW_FN_DEPS_PARSE_REGEX = /\((.*?)\)\W?=>/
@@ -88,7 +89,7 @@ module.exports = class Ref {
 			.map(([dependencyName]) => dependencyName)
 
 		if (missingDependencies.length) {
-			throw new Error(`Missing dependencies! ${JSON.stringify(missingDependencies)}`)
+			throw new KonteinerMissingDependenciesError(missingDependencies)
 		}
 
 		this.dependenciesRefs.forEach((ref) => {

@@ -102,13 +102,18 @@ Provides simple dependency provision structure of SimpleRefs as a Map.
 - `dependenciesRefs` - Map<string, Ref> - map ofreferences to required dependencies by name
 
 ## Errors
-- No custom errors yet, just with different error messages
 
-### 'Missing dependencies! ["dependencyName", ...]"
-- dependencies in error message were not registered and are missing during initialization of a dependency instance
-
-### 'Dependency "dependencyName" is not registered'
+### KonteinerNotRegisteredError
 - attempted get operation for not registered dependency
+	- `message` - string - e.g. 'Dependency "dependencyName" is not registered'
+	- `dependency` - string - e.g. "dependencyName"
 
-### 'Cyclic dependency found! [dependencyA->dependencyB->dependencyA]'
-- during initialization of dependencyA found dependency loop
+### KonteinerMissingDependenciesError
+- dependencies in error message were not registered and are missing during initialization of a dependency instance
+	- `message` - string - e.g. 'Missing dependencies! ["dependencyA","dependencyB"]"
+	- `dependencies` - string[] - e.g. ["dependencyA","dependencyB"]
+
+### KonteinerCyclicDepError
+- during initialization of dependency found dependency loop
+	- `message` - string - e.g. 'Cyclic dependency found! ["dependencyA"->"dependencyB"->"dependencyA"]'
+	- `dependencies` - string[] - e.g. ["dependencyA", "dependencyB", "dependencyA"]

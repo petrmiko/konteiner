@@ -58,9 +58,9 @@ describe('RefMap', function() {
 			refMap.add(new Ref('b', b))
 			refMap.add(new Ref('c', c))
 
-			assert.throws(() => refMap.get('a'), 'Cyclic dependency found! [a->b->c->a]')
-			assert.throws(() => refMap.get('b'), 'Cyclic dependency found! [b->c->a->b]')
-			assert.throws(() => refMap.get('c'), 'Cyclic dependency found! [c->a->b->c]')
+			assert.throws(() => refMap.get('a'), 'Cyclic dependency found! ["a"->"b"->"c"->"a"]')
+			assert.throws(() => refMap.get('b'), 'Cyclic dependency found! ["b"->"c"->"a"->"b"]')
+			assert.throws(() => refMap.get('c'), 'Cyclic dependency found! ["c"->"a"->"b"->"c"]')
 		})
 	})
 })

@@ -1,5 +1,8 @@
 const NO_DEPS = 'no-deps'
 
+const KonteinerCyclicDepError = require('../errors/cyclic-dep-error')
+const KonteinerNotRegisteredError = require('../errors/not-registered-error')
+
 /**
  * @typedef {import('./ref')} Ref
  */
@@ -54,13 +57,13 @@ class RefMap {
 		const refName = searchStack.pop()
 		const ref = this.refsByName.get(refName)
 
-		if (!ref) throw new Error(`Dependency "${refName}" is not registered`)
+		if (!ref) throw new KonteinerNotRegisteredError(refName)
 
 		const dependenciesNames = ref.getDependenciesNames()
 		if (!dependenciesNames.length) return
 
 		if (dependenciesNames.some((dependency) => dependency === refName || searchStack.includes(dependency))) {
-			throw new Error(`Cyclic dependency found! [${[...searchStack, refName, dependenciesNames].join('->')}]`)
+			throw new KonteinerCyclicDepError([...searchStack, refName, dependenciesNames])
 		}
 		dependenciesNames.forEach((dependency) => {
 			this.checkDependenciesIntegrity([...searchStack, refName, dependency])
