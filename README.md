@@ -34,12 +34,12 @@ If you want to load all dependencies in an directory, you can also do following.
 ```
 const Konteiner = require('konteiner')
 const konteiner = new Konteiner({exclude: [
-	'.test.' // all test files will be omitted from batch loading using .registerPath
+	'\\.test\\.' // all test files will be omitted from batch loading using .registerPath
 ]})
 
 konteiner.registerPath('./src', {exclude: [
-	'.test.',
-	'index.js'
+	'\\.test\\.',
+	'index\\.js'
 ]}) // all but tests and index.js will be loaded. Overrides exclude from constructor for this call only
 
 const someService = konteiner.get('someService') // all dependencies bound to someService will be now initialized

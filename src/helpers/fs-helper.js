@@ -8,15 +8,15 @@ const {toCamelCase} = require('./format-helper')
  * @param {?Array<string>} acc
  * @param {{
  * 	searchDepth: number,
- * 	supportedAutofixExtensions?: Array<string>,
+ * 	supportedExtensions?: Array<string>,
  * }} config
  * @returns {Array<string>}
  */
 const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => {
-	const {supportedAutofixExtensions = [], searchDepth = -1} = config
+	const {supportedExtensions = [], searchDepth = -1} = config
 	let saneStartPath = startPath
 	if (!fs.existsSync(startPath)) {
-		supportedAutofixExtensions.forEach((supportedAppendSuffix) => {
+		supportedExtensions.forEach((supportedAppendSuffix) => {
 			const tmpPath =  startPath + supportedAppendSuffix
 			if(fs.existsSync(tmpPath)) {
 				saneStartPath = tmpPath
@@ -24,7 +24,12 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 			}
 		})
 	}
+
 	if (!fs.statSync(saneStartPath).isDirectory()) {
+		const extension = path.parse(saneStartPath).ext
+		if(!supportedExtensions.includes(extension)) {
+			return acc
+		}
 		return [].concat(acc, saneStartPath)
 	} else {
 		if (searchDepth > 0 && searchDepth < currentDepth) return acc

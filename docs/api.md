@@ -17,7 +17,7 @@ Konteiner is implemented as a class providing following API.
 		- maximum dir depth to search for dependencies
 			- `1` (default) - only specified directory
 			- `>0` - registers whole subtree
-	- `supportedAutofixExtensions` - optional string[]
+	- `supportedExtensions` - optional string[]
 		- _sets default for `.registerPath`_
 		- if provided path is not found, provided extensions will be appended and tested
 			- `['.js']` (default)
@@ -45,7 +45,7 @@ Konteiner is implemented as a class providing following API.
 
 - `path` - string
 	- path to load
-	- if file `options.supportedAutofixExtensions` may apply
+	- if file `options.supportedExtensions` may apply
 	- if directory `options.dirSearchDepth` may apply
 - `options` - optional Object
 	- `exclude` (alias `skipFiles`) - optional string[]
@@ -56,7 +56,7 @@ Konteiner is implemented as a class providing following API.
 			- `1` (default) - only specified directory
 			- `>0` - registers whole subtree
 		- _usage overrides default from constructor_
-	- `supportedAutofixExtensions` - optional string[]
+	- `supportedExtensions` - optional string[]
 		- if provided path is not found, provided extensions will be appended and tested
 			- `['.js']` (default)
 		- _usage overrides default from constructor_

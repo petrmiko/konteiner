@@ -9,7 +9,7 @@ const RefMap = require('./structures/ref-map')
  * @property {[Array<string>]} exclude excludes files during  call by pattern
  * @property {[number]} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
  * 	1 = only current (default), -1 = all the way down
- * @property {[Array<string>]} supportedAutofixExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
+ * @property {[Array<string>]} supportedExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
  * @property {[string]} prefix string to prefix loaded dependecies names
  * @property {[string]} suffix string to suffix loaded dependecies names
  */
@@ -19,7 +19,7 @@ const RefMap = require('./structures/ref-map')
   * @property {[Array<string>]} exclude .registerPath config - excludes files during  call by pattern
   * @property {[number]} dirSearchDepth .registerPath config - how deep in subdirectories will Konteiner search for dependencies
   * 	1 = only current (default), -1 = all the way down
-  * @property {[Array<string>]} supportedAutofixExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
+  * @property {[Array<string>]} supportedExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
   */
 
 class Konteiner {
@@ -34,7 +34,7 @@ class Konteiner {
 
 		this.exclude = options.exclude || options.skipFiles || []
 		this.searchDepth = options.dirSearchDepth || 1
-		this.supportedAutofixExtensions = options.supportedAutofixExtensions || ['.js']
+		this.supportedExtensions = options.supportedExtensions || ['.js']
 
 		this.refMap.add(new Ref('container', () => this))
 		this.refMap.add(new Ref('konteiner', () => this))
@@ -61,8 +61,8 @@ class Konteiner {
 	registerPath(path, options = {}) {
 		const exclude = options.exclude || options.skipFiles || this.exclude
 		const searchDepth = options.dirSearchDepth || this.searchDepth
-		const supportedAutofixExtensions = options.supportedAutofixExtensions || this.supportedAutofixExtensions
-		const files = fsHelper.getFileListSync(path, [], {supportedAutofixExtensions, searchDepth})
+		const supportedExtensions = options.supportedExtensions || this.supportedExtensions
+		const files = fsHelper.getFileListSync(path, [], {supportedExtensions, searchDepth})
 		const filesMap = fsHelper.transformFileListToDependenciesMap(files, exclude)
 
 		filesMap.forEach((path, depName) => {
@@ -87,7 +87,7 @@ class Konteiner {
 	 */
 	getByTag(tagName) {
 		const refs = this.refMap.getByTag(tagName)
-		refs.map((ref) => {
+		return refs.map((ref) => {
 			if (!ref.isInitialized()) ref.initialize()
 			return ref.getInstance()
 		})
