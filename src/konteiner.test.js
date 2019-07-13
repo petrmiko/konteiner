@@ -4,7 +4,7 @@ const path = require('path')
 const sinon = require('sinon')
 
 const Konteiner = require('./konteiner')
-const Ref = require('./structures/ref')
+const {Ref} = require('./structures/refs')
 
 describe('Konteiner', function() {
 
@@ -19,9 +19,6 @@ describe('Konteiner', function() {
 			})
 
 			const Messenger = (logger) => ({
-				/**
-				 * @param {string} message
-				 */
 				sendMessage(message) {
 					logger.log(message)
 				}
@@ -48,9 +45,6 @@ describe('Konteiner', function() {
 			const Messenger = function(logger) {
 
 				return {
-					/**
-					 * @param {string} message
-					 */
 					sendMessage(message) {
 						logger.log(message)
 					}
@@ -79,9 +73,6 @@ describe('Konteiner', function() {
 			const Messenger = function messenger(logger) {
 
 				return {
-					/**
-					 * @param {string} message
-					 */
 					sendMessage(message) {
 						logger.log(message)
 					}
@@ -114,9 +105,6 @@ describe('Konteiner', function() {
 					this.logger = logger
 				}
 
-				/**
-				 * @param {string} message
-				 */
 				sendMessage(message) {
 					this.logger.log(message)
 				}

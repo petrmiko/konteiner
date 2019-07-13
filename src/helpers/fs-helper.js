@@ -4,13 +4,16 @@ const path = require('path')
 const {toCamelCase} = require('./format-helper')
 
 /**
+ * @module FsHelper
+ */
+
+/**
  * @param {string} startPath
- * @param {?Array<string>} acc
- * @param {{
- * 	searchDepth: number,
- * 	supportedExtensions?: Array<string>,
- * }} config
- * @returns {Array<string>}
+ * @param {Array.<string>=} acc
+ * @param {Object=} config
+ * @param {number=} config.searchDepth default -1
+ * @param {Array.<string>=} config.supportedExtensions
+ * @returns {Array.<string>}
  */
 const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => {
 	const {supportedExtensions = [], searchDepth = -1} = config
@@ -41,8 +44,8 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 }
 
 /**
- * @param {Array<string>} fileList
- * @param {?Array<string|RegExp>} exlusionList
+ * @param {Array.<string>} fileList
+ * @param {Array.<string>=} exlusionList
  * @returns {Map<string, string>}
  */
 const transformFileListToDependenciesMap = (fileList, exclusionList = []) => {

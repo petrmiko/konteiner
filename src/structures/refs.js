@@ -12,17 +12,31 @@ const INIT_TYPE = {
 }
 
 /**
+ * @property {boolean} initialized
+ * @property {string} name
+ * @property {string=} path
+ * @property {string} type
+ */
+class SimpleRef {
+	/**
+	 * @param {Ref} ref
+	 */
+	constructor(ref) {
+		const {name, type, path, initialized} = ref
+		Object.assign(this, {name, type, path, initialized})
+	}
+}
+
+
+/**
  * @template DependencyInstance
  */
-/**
- * @typedef {{name: string, type: string, path: string, initialized: boolean}} SimpleRef
- */
-module.exports = class Ref {
+class Ref {
 
 	/**
 	 * @param {string} name
-	 * @param {DependencyInstance|function(any...):DependencyInstance} implementation
-	 * @param {?string} path
+	 * @param {DependencyInstance|function(any):DependencyInstance} implementation
+	 * @param {string=} path
 	 */
 	constructor(name, implementation, path) {
 		this.name = name
@@ -58,7 +72,7 @@ module.exports = class Ref {
 	}
 
 	/**
-	 * @returns {Array<string>}
+	 * @returns {Array.<string>}
 	 */
 	getDependenciesNames() {
 		return this.dependenciesNames
@@ -125,7 +139,8 @@ module.exports = class Ref {
 	 * @returns {SimpleRef}
 	 */
 	simple() {
-		const {name, type, path, initialized} = this
-		return {name, type, path, initialized}
+		return new SimpleRef(this)
 	}
 }
+
+module.exports = {Ref, SimpleRef}

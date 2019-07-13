@@ -2,7 +2,7 @@ const {describe, it} = require('mocha')
 const {assert} = require('chai')
 const sinon = require('sinon')
 
-const Ref = require('./ref')
+const {Ref} = require('./refs')
 const RefMap = require('./ref-map')
 
 describe('RefMap', function() {

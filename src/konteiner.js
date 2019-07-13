@@ -1,33 +1,36 @@
 const fsHelper = require('./helpers/fs-helper')
 const formatHelper = require('./helpers/format-helper')
 
-const Ref = require('./structures/ref')
+const {Ref, SimpleRef} = require('./structures/refs') // eslint-disable-line no-unused-vars
 const RefMap = require('./structures/ref-map')
-
-/**
- * @typedef RegisterPathOptions
- * @property {[Array<string>]} exclude excludes files during  call by pattern
- * @property {[number]} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
- * 	1 = only current (default), -1 = all the way down
- * @property {[Array<string>]} supportedExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
- * @property {[string]} prefix string to prefix loaded dependecies names
- * @property {[string]} suffix string to suffix loaded dependecies names
- */
-
-/**
-  * @typedef KonteinerOptions
-  * @property {[Array<string>]} exclude .registerPath config - excludes files during  call by pattern
-  * @property {[number]} dirSearchDepth .registerPath config - how deep in subdirectories will Konteiner search for dependencies
-  * 	1 = only current (default), -1 = all the way down
-  * @property {[Array<string>]} supportedExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
-  */
 
 class Konteiner {
 
-	static container() {return new Konteiner(...arguments)}
+	/**
+	 * @typedef KonteinerOptions
+	 * @property {Array.<string>=} exclude .registerPath config - excludes files during  call by pattern
+	 * @property {number=} dirSearchDepth .registerPath config - how deep in subdirectories will Konteiner search for dependencies
+	 * 	1 = only current (default), -1 = all the way down
+	 * @property {Array.<string>=} supportedExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
+	 */
 
 	/**
-	 * @param {[KonteinerOptions]} options
+	 * @typedef RegisterPathOptions
+	 * @property {Array.<string>=} exclude excludes files during  call by pattern
+	 * @property {number=} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
+	 * 	1 = only current (default), -1 = all the way down
+	 * @property {Array.<string>=} supportedExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
+	 * @property {string=} prefix string to prefix loaded dependecies names
+	 * @property {string=} suffix string to suffix loaded dependecies names
+	 */
+
+	/**
+	 * @param {KonteinerOptions=} options
+	 */
+	static container(options) {return new Konteiner(options)}
+
+	/**
+	 * @param {KonteinerOptions=} options
 	 */
 	constructor(options = {}) {
 		this.refMap = new RefMap()
@@ -46,7 +49,7 @@ class Konteiner {
 	/**
 	 * @param {string} depName dependency name
 	 * @param {any} implementation
-	 * @param {?RegisterPathOptions} options
+	 * @param {RegisterPathOptions=} options
 	 */
 	register(depName, implementation, options = {}) {
 		const {prefix, suffix, tags} = options
@@ -56,7 +59,7 @@ class Konteiner {
 
 	/**
 	 * @param {string} path
-	 * @param {?RegisterPathOptions} options
+	 * @param {RegisterPathOptions=} options
 	 */
 	registerPath(path, options = {}) {
 		const exclude = options.exclude || options.skipFiles || this.exclude
@@ -95,8 +98,7 @@ class Konteiner {
 	}
 
 	/**
-	 * @typedef {import('./structures/ref').SimpleRef} SimpleRef
-	 * @returns {Map<SimpleRef, SimpleRef[]}
+	 * @returns {Map<SimpleRef, SimpleRef[]>}
 	 */
 	getDependenciesProvisionStructure() {
 		return this.refMap.getProvisionStructure()

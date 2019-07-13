@@ -1,7 +1,10 @@
+/**
+ * @extends Error
+ */
 class KonteinerMissingDependenciesError extends Error {
 
 	/**
-	 * @param {Array<string>} dependencies
+	 * @param {string[]} dependencies
 	 */
 	constructor(dependencies) {
 		const message = `Missing dependencies! [${
