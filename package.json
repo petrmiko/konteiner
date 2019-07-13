@@ -16,7 +16,7 @@
     "container"
   ],
   "author": "Petr Miko",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^6.0.1",
