@@ -1,7 +1,3 @@
-![Latest version](https://badgen.net/npm/v/konteiner)
-![Install size](https://badgen.net/packagephobia/install/konteiner)
-![Dependencies](https://badgen.net/david/dep/petrmiko/konteiner)
-
 # konteiner - simple zero-dependencies DI container for node.js apps
 
 This module provides you means to:
