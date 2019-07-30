@@ -65,9 +65,8 @@ describe('Ref', function() {
 				unfulfilledDep.doSomething()
 			}
 			const ref = new Ref('{callable}', CALLABLE)
-			const dependenciesRefs = new Map()
 			try {
-				ref.initialize(dependenciesRefs)
+				ref.initialize()
 				assert.fail()
 			} catch (error) {
 				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
@@ -95,10 +94,9 @@ describe('Ref', function() {
 			const dep2Ref = new Ref('dep2', () => dep2)
 			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map([
-				[dep1Ref.getName(), dep1Ref],
-				[dep2Ref.getName(), dep2Ref],
-			])
+			const dependenciesRefs = new Map()
+			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
+			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
 
 			ref.updateDependenciesRefs(dependenciesRefs)
 			ref.initialize()
@@ -139,9 +137,8 @@ describe('Ref', function() {
 				unfulfilledDep.doSomething()
 			}
 			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-			const dependenciesRefs = new Map()
 			try {
-				ref.initialize(dependenciesRefs)
+				ref.initialize()
 				assert.fail()
 			} catch (error) {
 				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
@@ -170,10 +167,9 @@ describe('Ref', function() {
 			const dep2Ref = new Ref('dep2', function() { return dep2})
 			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map([
-				[dep1Ref.getName(), dep1Ref],
-				[dep2Ref.getName(), dep2Ref],
-			])
+			const dependenciesRefs = new Map()
+			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
+			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
 
 			ref.updateDependenciesRefs(dependenciesRefs)
 			ref.initialize()
@@ -220,9 +216,8 @@ describe('Ref', function() {
 				}
 			}
 			const ref = new Ref('{constructible}', Constructible)
-			const dependenciesRefs = new Map()
 			try {
-				ref.initialize(dependenciesRefs)
+				ref.initialize()
 				assert.fail()
 			} catch (error) {
 				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
@@ -252,10 +247,9 @@ describe('Ref', function() {
 			const dep2Ref = new Ref('dep2', () => dep2)
 			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map([
-				[dep1Ref.getName(), dep1Ref],
-				[dep2Ref.getName(),  dep2Ref],
-			])
+			const dependenciesRefs = new Map()
+			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
+			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
 
 			ref.updateDependenciesRefs(dependenciesRefs)
 			ref.initialize()

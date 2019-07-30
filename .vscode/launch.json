@@ -8,12 +8,14 @@
 			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
 			"args": [
 				"--trace-warnings",
-				"${workspaceFolder}/**/*.test.js"
+				"--recursive",
+				"src",
+				"--extension",
+				".test.js",
 			],
 			"env": {
 				"NODE_ENV": "test"
 			},
-			"runtimeVersion": "10.15.0",
 		},
 	]
 }

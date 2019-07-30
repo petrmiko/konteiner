@@ -8,11 +8,16 @@ const {toCamelCase} = require('./format-helper')
  */
 
 /**
+  * @typedef FsListConfig
+  * @property {number=} searchDepth default -1
+  * @property {Array<string>=} supportedExtensions
+  */
+
+/**
  * @param {string} startPath
  * @param {Array<string>=} acc
- * @param {Object=} config
- * @param {number=} config.searchDepth default -1
- * @param {Array<string>=} config.supportedExtensions
+ * @param {FsListConfig=} config
+ * @param {number} currentDepth
  * @returns {Array<string>}
  */
 const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => {
@@ -45,7 +50,7 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 
 /**
  * @param {Array<string>} fileList
- * @param {Array<string>=} exlusionList
+ * @param {Array<string>=} exclusionList
  * @returns {Map<string, string>}
  */
 const transformFileListToDependenciesMap = (fileList, exclusionList = []) => {

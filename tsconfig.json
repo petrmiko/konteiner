@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "allowJs": true,
+        "checkJs": true,
+        "resolveJsonModule": true,
+        "noEmit": true,
+        "pretty": true,
+    },
+    "include": [
+        "src",
+        "test"
+    ],
+    "exclude": [
+        "tsconfig.json",
+    ],
+    "lib": ["es2015"],
+    "types": ["node"]
+}

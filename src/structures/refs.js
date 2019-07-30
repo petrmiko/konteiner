@@ -27,15 +27,25 @@ class SimpleRef {
 	}
 }
 
+/**
+ * @template Dependency
+ */
 
 /**
- * @template DependencyInstance
+ * @template T
+ * @typedef {function(...any=): T} Factory
  */
+
+/**
+  * @template T
+  * @typedef {function(new:T)} Class
+  */
+
 class Ref {
 
 	/**
 	 * @param {string} name
-	 * @param {DependencyInstance|function(any):DependencyInstance} implementation
+	 * @param {Factory<Dependency>|Class<Dependency>|Dependency} implementation
 	 * @param {string=} path
 	 */
 	constructor(name, implementation, path) {
@@ -79,7 +89,7 @@ class Ref {
 	}
 
 	/**
-	 * @returns {DependencyInstance}
+	 * @returns {Dependency} dependency instance
 	 */
 	getInstance() {
 		return this.instance
@@ -96,7 +106,7 @@ class Ref {
 	 * @returns {void}
 	 */
 	initialize() {
-		if (this.instance) return this.instance
+		if (this.initialized) return
 
 		const missingDependencies = Array.from(this.dependenciesRefs.entries())
 			.filter(([, ref]) => ref == null)
@@ -113,9 +123,16 @@ class Ref {
 		const dependenciesInstances = Array.from(this.dependenciesRefs.values())
 			.map((ref) => ref.getInstance())
 
-		this.instance = this.type === INIT_TYPE.CONSTRUCTIBLE
-			? new this.implementation(...dependenciesInstances)
-			: this.implementation(...dependenciesInstances)
+		this.instance = (() => {
+			if (typeof this.implementation !== 'function') return this.implementation // ts check avoid
+
+			switch(this.type) {
+			case INIT_TYPE.CONSTRUCTIBLE:
+				return Reflect.construct(this.implementation, dependenciesInstances)
+			case INIT_TYPE.CALLABLE:
+				return this.implementation.apply(null, dependenciesInstances)
+			}
+		})()
 		this.initialized = true
 	}
 
@@ -127,11 +144,12 @@ class Ref {
 	}
 
 	/**
-	 * @param {Map<string, DependencyInstance>} dependenciesRefs
+	 * @param {Map<string, Ref>} dependenciesRefs
 	 */
 	updateDependenciesRefs(dependenciesRefs) {
 		this.dependenciesNames.forEach((dependencyName) => {
-			this.dependenciesRefs.set(dependencyName, dependenciesRefs.get(dependencyName))
+			const ref = dependenciesRefs.get(dependencyName)
+			if (ref) this.dependenciesRefs.set(dependencyName, ref)
 		})
 	}
 

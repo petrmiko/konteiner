@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha --recursive './src/**/*.test.js'",
-    "test:coverage": "nyc --reporter=lcovonly --report-dir=coverage npm run test && nyc report"
+    "test:coverage": "nyc --reporter=lcovonly --report-dir=coverage npm run test && nyc report",
+    "lint": "eslint . && tsc"
   },
   "keywords": [
     "di",
@@ -22,13 +23,15 @@
   "author": "Petr Miko",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^10.14.13",
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
     "eslint": "^6.0.1",
     "husky": "^3.0.0",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
-    "sinon": "^7.3.2"
+    "sinon": "^7.3.2",
+    "typescript": "^3.5.3"
   },
   "husky": {
     "hooks": {

@@ -60,7 +60,7 @@ class RefMap {
 		if (!dependenciesNames.length) return
 
 		if (dependenciesNames.some((dependency) => dependency === refName || searchStack.includes(dependency))) {
-			throw new KonteinerCyclicDepError([...searchStack, refName, dependenciesNames])
+			throw new KonteinerCyclicDepError([].concat(...searchStack, refName, dependenciesNames))
 		}
 		dependenciesNames.forEach((dependency) => {
 			this.checkDependenciesIntegrity([...searchStack, refName, dependency])

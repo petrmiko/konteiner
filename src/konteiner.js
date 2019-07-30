@@ -9,6 +9,7 @@ class Konteiner {
 	/**
 	 * @typedef KonteinerOptions
 	 * @property {Array<string>=} exclude .registerPath config - excludes files during  call by pattern
+	 * @property {Array<string>=} skipFiles exclude alias
 	 * @property {number=} dirSearchDepth .registerPath config - how deep in subdirectories will Konteiner search for dependencies
 	 * 	1 = only current (default), -1 = all the way down
 	 * @property {Array<string>=} supportedExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
@@ -17,11 +18,13 @@ class Konteiner {
 	/**
 	 * @typedef RegisterPathOptions
 	 * @property {Array<string>=} exclude excludes files during  call by pattern
+	 * @property {Array<string>=} skipFiles exclude alias
 	 * @property {number=} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
 	 * 	1 = only current (default), -1 = all the way down
 	 * @property {Array<string>=} supportedExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
 	 * @property {string=} prefix string to prefix loaded dependecies names
 	 * @property {string=} suffix string to suffix loaded dependecies names
+	 * @property {Array<string>=} tags
 	 */
 
 	/**
