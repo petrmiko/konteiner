@@ -72,7 +72,7 @@ class Ref {
 	}
 
 	/**
-	 * @returns {Array.<string>}
+	 * @returns {Array<string>}
 	 */
 	getDependenciesNames() {
 		return this.dependenciesNames

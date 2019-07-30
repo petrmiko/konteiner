@@ -146,7 +146,7 @@ describe('Konteiner', function() {
 		})
 
 		describe('register', function() {
-			it('no options - converts dependency name to camelCase and stores new Ref', function() {
+			it('no options - keeps provided name and stores new Ref', function() {
 				const IMPLEMENTATION = '{implementation}'
 				const konteiner = new Konteiner()
 
@@ -154,7 +154,7 @@ describe('Konteiner', function() {
 
 				konteiner.register('dep-name', IMPLEMENTATION)
 				sinon.assert.calledOnce(refMapAdd)
-				sinon.assert.calledWith(refMapAdd, new Ref('depName', IMPLEMENTATION))
+				sinon.assert.calledWith(refMapAdd, new Ref('dep-name', IMPLEMENTATION))
 			})
 
 			it('options.prefix - converts dependency name to camelCase and stores new Ref', function() {

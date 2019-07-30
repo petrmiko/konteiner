@@ -8,13 +8,13 @@ class RefMap {
 
 	constructor() {
 		this.refsByName = /** @type {Map<string, Ref>} */ (new Map())
-		this.refsByTag = /** @type {Map<string, Array.<Ref>>} */ (new Map())
+		this.refsByTag = /** @type {Map<string, Array<Ref>>} */ (new Map())
 		this.refMap = new Map()
 	}
 
 	/**
 	 * @param {Ref} ref
-	 * @param {Array.<string>=} tags
+	 * @param {Array<string>=} tags
 	 */
 	add(ref, tags = []) {
 		const {name: refName, path} = ref
@@ -48,7 +48,7 @@ class RefMap {
 	}
 
 	/**
-	 * @param {Array.<string>} searchStack
+	 * @param {Array<string>} searchStack
 	 */
 	checkDependenciesIntegrity(searchStack) {
 		const refName = searchStack.pop()
@@ -78,7 +78,7 @@ class RefMap {
 
 	/**
 	 * @param {string} tagName
-	 * @returns {Array.<Ref>}
+	 * @returns {Array<Ref>}
 	 */
 	getByTag(tagName) {
 		return this.refsByTag.get(tagName) || []
@@ -93,7 +93,7 @@ class RefMap {
 	}
 
 	/**
-	 * @returns {Map<SimpleRef, Array.<SimpleRef>>}
+	 * @returns {Map<SimpleRef, Array<SimpleRef>>}
 	 */
 	getProvisionStructure() {
 		return Array.from(this.refMap.entries()).reduce((acc, [refName, depsNames]) => {

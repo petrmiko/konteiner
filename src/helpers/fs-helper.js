@@ -9,11 +9,11 @@ const {toCamelCase} = require('./format-helper')
 
 /**
  * @param {string} startPath
- * @param {Array.<string>=} acc
+ * @param {Array<string>=} acc
  * @param {Object=} config
  * @param {number=} config.searchDepth default -1
- * @param {Array.<string>=} config.supportedExtensions
- * @returns {Array.<string>}
+ * @param {Array<string>=} config.supportedExtensions
+ * @returns {Array<string>}
  */
 const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => {
 	const {supportedExtensions = [], searchDepth = -1} = config
@@ -44,8 +44,8 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 }
 
 /**
- * @param {Array.<string>} fileList
- * @param {Array.<string>=} exlusionList
+ * @param {Array<string>} fileList
+ * @param {Array<string>=} exlusionList
  * @returns {Map<string, string>}
  */
 const transformFileListToDependenciesMap = (fileList, exclusionList = []) => {
