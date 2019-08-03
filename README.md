@@ -1,5 +1,8 @@
 # konteiner - simple zero-dependencies DI container for node.js apps
 
+[![Build Status](https://travis-ci.com/petrmiko/konteiner.svg?branch=master)](https://travis-ci.com/petrmiko/konteiner)
+[![Coverage Status](https://coveralls.io/repos/github/petrmiko/konteiner/badge.svg)](https://coveralls.io/github/petrmiko/konteiner)
+
 This module provides you means to:
 - register desired modules (objects, functions, classes) to DI container
 - use the initialized dependencies in modules by obtaining them from constructor/parent function
