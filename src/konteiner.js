@@ -42,8 +42,8 @@ class Konteiner {
 		this.searchDepth = options.dirSearchDepth || 1
 		this.supportedExtensions = options.supportedExtensions || ['.js']
 
-		this.refMap.add(new Ref('container', () => this))
-		this.refMap.add(new Ref('konteiner', () => this))
+		this.refMap.add(new Ref('container', this))
+		this.refMap.add(new Ref('konteiner', this))
 
 		//aliases
 		this.load = this.registerPath

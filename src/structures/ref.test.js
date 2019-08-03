@@ -259,5 +259,16 @@ describe('Ref', function() {
 			sinon.assert.calledOnce(dep1.doSomething)
 			sinon.assert.calledOnce(dep2.doSomethingElse)
 		})
+
+		it('Supports implicit constructor class dependency', function() {
+			class Constructible {
+				someFn() { return '{value}'}
+			}
+
+			const ref = new Ref('constructible', Constructible)
+			ref.initialize()
+			assert.isTrue(ref.isInitialized())
+			assert.equal(ref.getInstance().someFn(), '{value}')
+		})
 	})
 })

@@ -1,8 +1,9 @@
 const NO_DEPS = 'no-deps'
 
-const Ref = require('./ref') // eslint-disable-line no-unused-vars
+const Ref = require('./ref')
 const KonteinerCyclicDepError = require('../errors/cyclic-dep-error')
 const KonteinerNotRegisteredError = require('../errors/not-registered-error')
+const KonteinerNotRegisteredTagError = require('../errors/not-registered-tag-error')
 
 class RefMap {
 
@@ -21,12 +22,13 @@ class RefMap {
 		const preexistingRef = this.refsByName.get(refName)
 		if (preexistingRef) {
 			if (preexistingRef.path === path) {
-				console.log('Attempt to re-add', {refName, path}, ', ignoring...')
+				console.log('Attempt to re-add', Ref.toSimpleRef(ref), ', ignoring...')
 				return
 			} else {
 				console.log('Overriding', preexistingRef, 'with', ref)
 			}
 		}
+		if (!this.refMap.get(refName)) this.refMap.set(refName, new Set())
 		const dependenciesNames = ref.getDependenciesNames()
 
 		const pointerNames = dependenciesNames.length ? dependenciesNames : [NO_DEPS]
@@ -81,7 +83,10 @@ class RefMap {
 	 * @returns {Array<Ref>}
 	 */
 	getByTag(tagName) {
-		return this.refsByTag.get(tagName) || []
+		const refsWithTag = this.refsByTag.get(tagName) || []
+		if (!refsWithTag.length) throw new KonteinerNotRegisteredTagError(tagName)
+		refsWithTag.forEach(ref => this.checkDependenciesIntegrity([ref.getName()]))
+		return refsWithTag
 	}
 
 	/**
@@ -89,6 +94,10 @@ class RefMap {
 	 * @returns {boolean}
 	 */
 	remove(refName) {
+		this.refsByTag.forEach((refs) => {
+			const refIndex = refs.findIndex((ref) => ref.getName() === refName)
+			if (refIndex >= 0) refs.splice(refIndex, 1)
+		})
 		return this.refsByName.delete(refName)
 	}
 
@@ -97,7 +106,7 @@ class RefMap {
 	 */
 	getProvisionStructure() {
 		return Array.from(this.refMap.entries()).reduce((acc, [refName, depsNames]) => {
-			const ref = Ref.toSimpleRef(this.refsByName.get(refName))
+			const ref = this.refsByName.get(refName) && Ref.toSimpleRef(this.refsByName.get(refName)) || undefined
 			acc.set(
 				ref,
 				depsNames
@@ -106,7 +115,7 @@ class RefMap {
 						return ref
 							? Ref.toSimpleRef(ref)
 							: undefined
-					})
+					}).filter(Boolean)
 					: []
 			)
 			return acc
