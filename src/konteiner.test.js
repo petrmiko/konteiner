@@ -4,7 +4,7 @@ const path = require('path')
 const sinon = require('sinon')
 
 const Konteiner = require('./konteiner')
-const {Ref} = require('./structures/refs')
+const Ref = require('./structures/ref')
 
 describe('Konteiner', function() {
 

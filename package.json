@@ -10,7 +10,7 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test mocha --recursive './src/**/*.test.js'",
     "test:coverage": "nyc --reporter=lcovonly --report-dir=coverage npm run test && nyc report",
-    "test:coveralls": "node --eval \"require('fs').createReadStream(process.argv[1]).pipe(process.stdout)\" ./coverage/lcov.info | coveralls",
+    "publish:coveralls": "node --eval \"require('fs').createReadStream(process.argv[1]).pipe(process.stdout)\" ./coverage/lcov.info | coveralls",
     "lint": "eslint . && tsc"
   },
   "keywords": [

@@ -1,6 +1,6 @@
 const NO_DEPS = 'no-deps'
 
-const {Ref, SimpleRef} = require('./refs') // eslint-disable-line no-unused-vars
+const Ref = require('./ref') // eslint-disable-line no-unused-vars
 const KonteinerCyclicDepError = require('../errors/cyclic-dep-error')
 const KonteinerNotRegisteredError = require('../errors/not-registered-error')
 
@@ -21,7 +21,7 @@ class RefMap {
 		const preexistingRef = this.refsByName.get(refName)
 		if (preexistingRef) {
 			if (preexistingRef.path === path) {
-				console.log('Attempt to re-add', preexistingRef.simple(), ', ignoring...')
+				console.log('Attempt to re-add', {refName, path}, ', ignoring...')
 				return
 			} else {
 				console.log('Overriding', preexistingRef, 'with', ref)
@@ -93,15 +93,20 @@ class RefMap {
 	}
 
 	/**
-	 * @returns {Map<SimpleRef, Array<SimpleRef>>}
+	 * @returns {Map<typeof Ref.toSimpleRef, typeof Ref.toSimpleRef[]>}
 	 */
 	getProvisionStructure() {
 		return Array.from(this.refMap.entries()).reduce((acc, [refName, depsNames]) => {
-			const ref = this.refsByName.get(refName) && this.refsByName.get(refName).simple()
+			const ref = Ref.toSimpleRef(this.refsByName.get(refName))
 			acc.set(
 				ref,
 				depsNames
-					? Array.from(depsNames).map((depName) => this.refsByName.get(depName) && this.refsByName.get(depName).simple())
+					? Array.from(depsNames).map((depName) => {
+						const ref = this.refsByName.get(depName)
+						return ref
+							? Ref.toSimpleRef(ref)
+							: undefined
+					})
 					: []
 			)
 			return acc

@@ -1,7 +1,7 @@
 const fsHelper = require('./helpers/fs-helper')
 const formatHelper = require('./helpers/format-helper')
 
-const {Ref, SimpleRef} = require('./structures/refs') // eslint-disable-line no-unused-vars
+const Ref = require('./structures/ref') // eslint-disable-line no-unused-vars
 const RefMap = require('./structures/ref-map')
 
 class Konteiner {
@@ -105,7 +105,7 @@ class Konteiner {
 	}
 
 	/**
-	 * @returns {Map<SimpleRef, SimpleRef[]>}
+	 * @returns {Map<typeof Ref.toSimpleRef, typeof Ref.toSimpleRef[]>}
 	 */
 	getDependenciesProvisionStructure() {
 		return this.refMap.getProvisionStructure()

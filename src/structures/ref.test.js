@@ -2,7 +2,7 @@ const {describe, it} = require('mocha')
 const {assert} = require('chai')
 const sinon = require('sinon')
 
-const {Ref} = require('./refs')
+const Ref = require('./ref')
 
 describe('Ref', function() {
 

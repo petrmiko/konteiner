@@ -12,22 +12,6 @@ const INIT_TYPE = {
 }
 
 /**
- * @property {boolean} initialized
- * @property {string} name
- * @property {string=} path
- * @property {string} type
- */
-class SimpleRef {
-	/**
-	 * @param {Ref} ref
-	 */
-	constructor(ref) {
-		const {name, type, path, initialized} = ref
-		Object.assign(this, {name, type, path, initialized})
-	}
-}
-
-/**
  * @template Dependency
  */
 
@@ -42,6 +26,14 @@ class SimpleRef {
   */
 
 class Ref {
+
+	/**
+	 * @param {Ref} ref
+	 */
+	static toSimpleRef(ref) {
+		const {name, type, path, initialized} = ref
+		return {name, type, path, initialized}
+	}
 
 	/**
 	 * @param {string} name
@@ -152,13 +144,6 @@ class Ref {
 			if (ref) this.dependenciesRefs.set(dependencyName, ref)
 		})
 	}
-
-	/**
-	 * @returns {SimpleRef}
-	 */
-	simple() {
-		return new SimpleRef(this)
-	}
 }
 
-module.exports = {Ref, SimpleRef}
+module.exports = Ref
