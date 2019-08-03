@@ -13,3 +13,4 @@ test
 .eslintrc.js
 .eslintignore
 .travis.yml
+tsconfig.json
