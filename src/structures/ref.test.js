@@ -36,6 +36,21 @@ describe('Ref', function() {
 			assert.isEmpty(ref.getDependenciesNames())
 			assert.strictEqual(ref.getInstance(), CONFIG)
 		})
+
+		it('Initialize sets implementation to instance if not initialized, returs Ref', function() {
+			const STRING = '{testString}'
+			const ref = new Ref('{refName}', STRING)
+
+			assert.isTrue(ref.isInitialized())
+			assert.strictEqual(ref.initialize(), ref)
+			assert.strictEqual(ref.getInstance(), STRING)
+
+			// suppress initialized state to prevent early return - this should not occur
+			ref.initialized = false
+			assert.strictEqual(ref.initialize(), ref)
+			assert.isTrue(ref.isInitialized())
+			assert.strictEqual(ref.getInstance(), STRING)
+		})
 	})
 
 	describe('Callable dependency', function() {
@@ -48,7 +63,7 @@ describe('Ref', function() {
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 			assert.isTrue(ref.isInitialized())
 			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
 		})
@@ -92,7 +107,7 @@ describe('Ref', function() {
 
 			ref.setDependency(new Ref('dep1', () => dep1).initialize())
 			ref.setDependency(new Ref('dep2', () => dep2).initialize())
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 
 			assert.isTrue(ref.isInitialized())
 			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
@@ -113,7 +128,7 @@ describe('Ref', function() {
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
 		})
@@ -159,7 +174,7 @@ describe('Ref', function() {
 			ref.setDependency(new Ref('dep1', function() {return dep1}).initialize())
 			ref.setDependency(new Ref('dep2', function() {return dep2}).initialize())
 
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
@@ -181,7 +196,7 @@ describe('Ref', function() {
 			assert.isFalse(ref.isInitialized())
 			assert.isUndefined(ref.getInstance())
 
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 			assert.isTrue(ref.isInitialized())
 			assert.isTrue(ref.getInstance() instanceof Constructible)
 			assert.equal(ref.getInstance().someFn(), '{value}')
@@ -232,7 +247,7 @@ describe('Ref', function() {
 
 			ref.setDependency(new Ref('dep1', () => dep1).initialize())
 			ref.setDependency(new Ref('dep2', () => dep2).initialize())
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
@@ -246,7 +261,7 @@ describe('Ref', function() {
 			}
 
 			const ref = new Ref('constructible', Constructible)
-			ref.initialize()
+			assert.strictEqual(ref.initialize(), ref)
 			assert.isTrue(ref.isInitialized())
 			assert.equal(ref.getInstance().someFn(), '{value}')
 		})

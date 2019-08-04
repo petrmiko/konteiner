@@ -116,7 +116,7 @@ class Ref {
 			.map((ref) => ref.getInstance())
 
 		this.instance = (() => {
-			if (typeof this.implementation !== 'function') return this.implementation // ts check avoid
+			if (typeof this.implementation !== 'function') return this.implementation
 
 			switch(this.type) {
 			case INIT_TYPE.CONSTRUCTIBLE:

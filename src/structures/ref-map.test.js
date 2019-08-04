@@ -1,4 +1,4 @@
-const {describe, it} = require('mocha')
+const {describe, it, beforeEach, afterEach} = require('mocha')
 const {assert} = require('chai')
 const sinon = require('sinon')
 
@@ -8,6 +8,16 @@ const RefMap = require('./ref-map')
 describe('RefMap', function() {
 
 	describe('add', function() {
+
+		let logStub
+		beforeEach(function() {
+			logStub = sinon.stub(console, 'log')
+		})
+
+		afterEach(function() {
+			logStub.restore()
+		})
+
 		it('Stores reference and updates its dependencies refs by existing mapping', function(){
 			const refMap = new RefMap()
 
@@ -38,6 +48,29 @@ describe('RefMap', function() {
 			assert.strictEqual(refMap.get('messenger'), messengerRef)
 			assert.sameMembers(refMap.getByTag('messaging'), [messengerRef])
 			assert.strictEqual(messengerRef.dependenciesRefs.get('logger'), loggerRef)
+		})
+
+		it('Readdition - same ref - logged console hint', function() {
+			const refMap = new RefMap()
+			const ref = new Ref('a', () => {}, '{testPath}')
+
+			refMap.add(ref)
+			refMap.add(ref)
+
+			sinon.assert.calledOnce(logStub)
+			sinon.assert.calledWithExactly(logStub, 'Attempt to re-add', Ref.toSimpleRef(ref), ', ignoring...')
+		})
+
+		it('Readdition - different ref path - logged console hint', function() {
+			const refMap = new RefMap()
+			const ref1 = new Ref('a', () => {}, '{testPath}')
+			const ref2 = new Ref('a', () => {}, '{testPathNew}')
+
+			refMap.add(ref1)
+			refMap.add(ref2)
+
+			sinon.assert.calledOnce(logStub)
+			sinon.assert.calledWithExactly(logStub, 'Overriding', Ref.toSimpleRef(ref1), 'with', Ref.toSimpleRef(ref2))
 		})
 	})
 
@@ -116,10 +149,30 @@ describe('RefMap', function() {
 
 			assert.isTrue(refMap.remove('a'))
 			assert.throws(() => refMap.get('a'), 'Dependency "a" is not registered')
+			assert.strictEqual(refMap.get('b'), refB)
 			assert.sameMembers(refMap.getByTag(TAG), [refB])
 
 			assert.deepEqual(refMap.getDependencyMap(), new Map([
 				[undefined, [Ref.toSimpleRef(refB)]],
+			]))
+		})
+
+		it('Does nothing to registered refs and provides failure flag for non-registered dep removal', function() {
+			const refMap = new RefMap()
+			const TAG = '{tag}'
+
+			const refA = new Ref('a', () => 'a')
+			const refB = new Ref('b', () => 'b')
+			refMap.add(refA, [TAG])
+			refMap.add(refB, [TAG])
+
+			assert.isFalse(refMap.remove('c'))
+			assert.strictEqual(refMap.get('a'), refA)
+			assert.strictEqual(refMap.get('b'), refB)
+			assert.sameMembers(refMap.getByTag(TAG), [refA, refB])
+
+			assert.deepEqual(refMap.getDependencyMap(), new Map([
+				[undefined, [Ref.toSimpleRef(refA), Ref.toSimpleRef(refB)]],
 			]))
 		})
 	})

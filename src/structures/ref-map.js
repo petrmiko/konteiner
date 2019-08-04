@@ -23,7 +23,7 @@ class RefMap {
 				console.log('Attempt to re-add', Ref.toSimpleRef(ref), ', ignoring...')
 				return
 			} else {
-				console.log('Overriding', preexistingRef, 'with', ref)
+				console.log('Overriding', Ref.toSimpleRef(preexistingRef), 'with', Ref.toSimpleRef(ref))
 			}
 		}
 
