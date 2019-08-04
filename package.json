@@ -1,6 +1,6 @@
 {
   "name": "konteiner",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Simple DI container for node.js applications",
   "main": "index.js",
   "repository": {
