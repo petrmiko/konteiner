@@ -107,8 +107,8 @@ class Konteiner {
 	/**
 	 * @returns {Map<typeof Ref.toSimpleRef, typeof Ref.toSimpleRef[]>}
 	 */
-	getDependenciesProvisionStructure() {
-		return this.refMap.getProvisionStructure()
+	getDependencyMap() {
+		return this.refMap.getDependencyMap()
 	}
 
 	/**

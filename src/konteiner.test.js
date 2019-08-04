@@ -342,15 +342,15 @@ describe('Konteiner', function() {
 			})
 		})
 
-		describe('getDependenciesProvisionStructure', function() {
-			it('Only proxies refMap.getProvisionStructure', function() {
+		describe('getDependencyMap', function() {
+			it('Only proxies refMap.getDependencyMap', function() {
 				const RESULT = '{result}'
 				const konteiner = new Konteiner()
-				const getProvisionStructureStub = sinon.stub(konteiner.refMap, 'getProvisionStructure').returns(RESULT)
+				const getDependencyMapStub = sinon.stub(konteiner.refMap, 'getDependencyMap').returns(RESULT)
 
-				const result = konteiner.getDependenciesProvisionStructure()
+				const result = konteiner.getDependencyMap()
 				assert.strictEqual(result, RESULT)
-				sinon.assert.calledOnce(getProvisionStructureStub)
+				sinon.assert.calledOnce(getDependencyMapStub)
 			})
 		})
 

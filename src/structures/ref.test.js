@@ -86,19 +86,12 @@ describe('Ref', function() {
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref('dep1', () => dep1)
-			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref('dep2', () => dep2)
-			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map()
-			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
-			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
-
-			ref.updateDependenciesRefs(dependenciesRefs)
+			ref.setDependency(new Ref('dep1', () => dep1).initialize())
+			ref.setDependency(new Ref('dep2', () => dep2).initialize())
 			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())
@@ -159,19 +152,13 @@ describe('Ref', function() {
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref('dep1', function() { return dep1})
-			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref('dep2', function() { return dep2})
-			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map()
-			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
-			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
+			ref.setDependency(new Ref('dep1', function() {return dep1}).initialize())
+			ref.setDependency(new Ref('dep2', function() {return dep2}).initialize())
 
-			ref.updateDependenciesRefs(dependenciesRefs)
 			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())
@@ -239,19 +226,12 @@ describe('Ref', function() {
 			const dep1 = {
 				doSomething: sinon.spy(),
 			}
-			const dep1Ref = new Ref('dep1', () => dep1)
-			dep1Ref.initialize()
 			const dep2 = {
 				doSomethingElse: sinon.spy(),
 			}
-			const dep2Ref = new Ref('dep2', () => dep2)
-			dep2Ref.initialize()
 
-			const dependenciesRefs = new Map()
-			dependenciesRefs.set(dep1Ref.getName(), dep1Ref)
-			dependenciesRefs.set(dep2Ref.getName(), dep2Ref)
-
-			ref.updateDependenciesRefs(dependenciesRefs)
+			ref.setDependency(new Ref('dep1', () => dep1).initialize())
+			ref.setDependency(new Ref('dep2', () => dep2).initialize())
 			ref.initialize()
 
 			assert.isTrue(ref.isInitialized())

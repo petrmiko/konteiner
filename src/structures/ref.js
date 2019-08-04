@@ -95,10 +95,10 @@ class Ref {
 	}
 
 	/**
-	 * @returns {void}
+	 * @returns {Ref<Dependency>}
 	 */
 	initialize() {
-		if (this.initialized) return
+		if (this.initialized) return this
 
 		const missingDependencies = Array.from(this.dependenciesRefs.entries())
 			.filter(([, ref]) => ref == null)
@@ -126,6 +126,7 @@ class Ref {
 			}
 		})()
 		this.initialized = true
+		return this
 	}
 
 	/**
@@ -136,13 +137,10 @@ class Ref {
 	}
 
 	/**
-	 * @param {Map<string, Ref>} dependenciesRefs
+	 * @param {Ref} ref
 	 */
-	updateDependenciesRefs(dependenciesRefs) {
-		this.dependenciesNames.forEach((dependencyName) => {
-			const ref = dependenciesRefs.get(dependencyName)
-			if (ref) this.dependenciesRefs.set(dependencyName, ref)
-		})
+	setDependency(ref) {
+		this.dependenciesRefs.set(ref.getName(), ref)
 	}
 }
 

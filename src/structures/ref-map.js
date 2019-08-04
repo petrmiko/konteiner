@@ -1,5 +1,3 @@
-const NO_DEPS = 'no-deps'
-
 const Ref = require('./ref')
 const KonteinerCyclicDepError = require('../errors/cyclic-dep-error')
 const KonteinerNotRegisteredError = require('../errors/not-registered-error')
@@ -10,7 +8,7 @@ class RefMap {
 	constructor() {
 		this.refsByName = /** @type {Map<string, Ref>} */ (new Map())
 		this.refsByTag = /** @type {Map<string, Array<Ref>>} */ (new Map())
-		this.refMap = new Map()
+		this.depsMap = /** @type {Map<string, Array<Ref>>} */ (new Map())
 	}
 
 	/**
@@ -28,14 +26,6 @@ class RefMap {
 				console.log('Overriding', preexistingRef, 'with', ref)
 			}
 		}
-		if (!this.refMap.get(refName)) this.refMap.set(refName, new Set())
-		const dependenciesNames = ref.getDependenciesNames()
-
-		const pointerNames = dependenciesNames.length ? dependenciesNames : [NO_DEPS]
-		pointerNames.forEach((name) => {
-			if (!this.refMap.get(name)) this.refMap.set(name, new Set())
-			this.refMap.get(name).add(ref.getName())
-		})
 
 		this.refsByName.set(refName, ref)
 		tags.forEach((tag) => {
@@ -46,7 +36,21 @@ class RefMap {
 				refsWithTag.push(ref)
 			}
 		})
-		this.refsByName.forEach((ref) => ref.updateDependenciesRefs(this.refsByName))
+
+		const dependenciesNames = ref.getDependenciesNames()
+		// register for dependencies
+		;(dependenciesNames.length ? dependenciesNames : [undefined]).forEach((dependencyName) => {
+			if (!this.depsMap.has(dependencyName)) this.depsMap.set(dependencyName, [])
+			this.depsMap.get(dependencyName).push(ref)
+
+			// deps insert prior current ref - set dependency
+			if (this.refsByName.has(dependencyName)) ref.setDependency(this.refsByName.get(dependencyName))
+		})
+
+		// provide dependency
+		if (this.depsMap.has(refName)) {
+			this.depsMap.get(refName).forEach((dependentRef) => dependentRef.setDependency(ref))
+		}
 	}
 
 	/**
@@ -94,29 +98,24 @@ class RefMap {
 	 * @returns {boolean}
 	 */
 	remove(refName) {
-		this.refsByTag.forEach((refs) => {
+		const removeRef = (refs) => {
 			const refIndex = refs.findIndex((ref) => ref.getName() === refName)
 			if (refIndex >= 0) refs.splice(refIndex, 1)
-		})
+		}
+		this.refsByTag.forEach(removeRef)
+		this.depsMap.forEach(removeRef)
 		return this.refsByName.delete(refName)
 	}
 
 	/**
 	 * @returns {Map<typeof Ref.toSimpleRef, typeof Ref.toSimpleRef[]>}
 	 */
-	getProvisionStructure() {
-		return Array.from(this.refMap.entries()).reduce((acc, [refName, depsNames]) => {
-			const ref = this.refsByName.get(refName) && Ref.toSimpleRef(this.refsByName.get(refName)) || undefined
+	getDependencyMap() {
+		return Array.from(this.depsMap.entries()).reduce((acc, [refName, dependentRefs]) => {
+			const ref = this.refsByName.has(refName) ? Ref.toSimpleRef(this.refsByName.get(refName)) : refName
 			acc.set(
 				ref,
-				depsNames
-					? Array.from(depsNames).map((depName) => {
-						const ref = this.refsByName.get(depName)
-						return ref
-							? Ref.toSimpleRef(ref)
-							: undefined
-					}).filter(Boolean)
-					: []
+				dependentRefs.map((ref) => Ref.toSimpleRef(ref))
 			)
 			return acc
 		}, new Map())

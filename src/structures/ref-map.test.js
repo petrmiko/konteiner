@@ -117,14 +117,14 @@ describe('RefMap', function() {
 			assert.isTrue(refMap.remove('a'))
 			assert.throws(() => refMap.get('a'), 'Dependency "a" is not registered')
 			assert.sameMembers(refMap.getByTag(TAG), [refB])
-			assert.deepEqual(refMap.getProvisionStructure(), new Map([
+
+			assert.deepEqual(refMap.getDependencyMap(), new Map([
 				[undefined, [Ref.toSimpleRef(refB)]],
-				[Ref.toSimpleRef(refB), []],
 			]))
 		})
 	})
 
-	describe('getProvisionStructure', function() {
+	describe('getDependencyMap', function() {
 		it('Provides simplified overview of where is ref provided into as dependency', function() {
 			const refMap = new RefMap()
 
@@ -135,11 +135,10 @@ describe('RefMap', function() {
 			refMap.add(refB)
 			refMap.add(refC)
 
-			assert.deepEqual(refMap.getProvisionStructure(), new Map([
+			assert.deepEqual(refMap.getDependencyMap(), new Map([
 				[undefined, [Ref.toSimpleRef(refB)]],
 				[Ref.toSimpleRef(refA), [Ref.toSimpleRef(refC)]],
 				[Ref.toSimpleRef(refB), [Ref.toSimpleRef(refA), Ref.toSimpleRef(refC)]],
-				[Ref.toSimpleRef(refC), []]
 			]))
 		})
 	})
