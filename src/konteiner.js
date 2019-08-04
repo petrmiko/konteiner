@@ -70,7 +70,7 @@ class Konteiner {
 		const exclude = options.exclude || options.skipFiles || this.exclude
 		const searchDepth = options.dirSearchDepth || this.searchDepth
 		const supportedExtensions = options.supportedExtensions || this.supportedExtensions
-		const files = fsHelper.getFileListSync(path, [], {supportedExtensions, searchDepth})
+		const files = fsHelper.getFileListSync(path, {supportedExtensions, searchDepth})
 		const filesMap = fsHelper.transformFileListToDependenciesMap(files, exclude)
 
 		filesMap.forEach((path, depName) => {

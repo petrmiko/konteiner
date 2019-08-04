@@ -15,12 +15,12 @@ const {toCamelCase} = require('./format-helper')
 
 /**
  * @param {string} startPath
- * @param {Array<string>=} acc
  * @param {FsListConfig=} config
+ * @param {Array<string>=} acc
  * @param {number} currentDepth
  * @returns {Array<string>}
  */
-const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => {
+const getFileListSync = (startPath, config = {}, acc = [], currentDepth = 1) => {
 	const {supportedExtensions = [], searchDepth = -1} = config
 	let saneStartPath = startPath
 	if (!fs.existsSync(startPath)) {
@@ -31,6 +31,8 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 				return
 			}
 		})
+		// no adjustment made -> path really does not exist
+		if (saneStartPath === startPath) return acc
 	}
 
 	if (!fs.statSync(saneStartPath).isDirectory()) {
@@ -43,7 +45,7 @@ const getFileListSync = (startPath, acc = [], config = {}, currentDepth = 1) => 
 		if (searchDepth > 0 && searchDepth < currentDepth) return acc
 		return fs.readdirSync(saneStartPath)
 			.reduce((acc, file) => {
-				return getFileListSync(path.join(saneStartPath, file), acc, config, currentDepth + 1)
+				return getFileListSync(path.join(saneStartPath, file), config, acc, currentDepth + 1)
 			}, acc)
 	}
 }
