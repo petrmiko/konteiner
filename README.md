@@ -11,7 +11,7 @@ This module provides you means to:
 ## Usage
 
 - Install the dependency
-	npm i --save konteiner@latest
+	npm i --save @petrmiko/konteiner@latest
 - In JS code
 ```
 const Konteiner = require('konteiner')
