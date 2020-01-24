@@ -11,10 +11,10 @@ This module provides you means to:
 ## Usage
 
 - Install the dependency
-	npm i --save @petrmiko/konteiner@latest
+	`npm i --save @petrmiko/konteiner@latest`
 - In JS code
 ```
-const Konteiner = require('konteiner')
+const Konteiner = require('@petrmiko/konteiner')
 
 const konteiner = new Konteiner()
 // following lines will just register dependencies, init is made upon first get for affected dependencies
@@ -31,7 +31,7 @@ messenger.sendMessage('Hello world!') // console.log will print out 'Hello world
 
 If you want to load all dependencies in an directory, you can also do following.
 ```
-const Konteiner = require('konteiner')
+const Konteiner = require('@petrmiko/konteiner')
 const konteiner = new Konteiner({exclude: [
 	'\\.test\\.' // all test files will be omitted from batch loading using .registerPath
 ]})
