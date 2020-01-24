@@ -12,10 +12,6 @@ const INIT_TYPE = {
 }
 
 /**
- * @template Dependency
- */
-
-/**
  * @template T
  * @typedef {function(...any=): T} Factory
  */
@@ -25,6 +21,9 @@ const INIT_TYPE = {
   * @typedef {function(new:T)} Class
   */
 
+/**
+ * @template Dependency
+ */
 class Ref {
 
 	/**
