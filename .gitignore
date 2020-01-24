@@ -4,3 +4,4 @@ node_modules
 coverage
 out
 .coveralls.yml
+.npmrc
