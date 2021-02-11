@@ -1,36 +1,18 @@
 const fsHelper = require('./helpers/fs-helper')
-const formatHelper = require('./helpers/format-helper')
 
 const Ref = require('./structures/ref') // eslint-disable-line no-unused-vars
 const RefMap = require('./structures/ref-map')
 
+const KonteinerCyclicDepError = require('./errors/cyclic-dep-error')
+const KonteinerNotRegisteredError = require('./errors/not-registered-error')
+
+/**
+ * @typedef {import('./konteiner-types').KonteinerOptions} KonteinerOptions
+ * @typedef {import('./konteiner-types').RegisterOptions} RegisterOptions
+ * @typedef {import('./konteiner-types').RegisterPathOptions} RegisterPathOptions
+ */
+
 class Konteiner {
-
-	/**
-	 * @typedef KonteinerOptions
-	 * @property {Array<string>=} exclude .registerPath config - excludes files during  call by pattern
-	 * @property {Array<string>=} skipFiles exclude alias
-	 * @property {number=} dirSearchDepth .registerPath config - how deep in subdirectories will Konteiner search for dependencies
-	 * 	1 = only current (default), -1 = all the way down
-	 * @property {Array<string>=} supportedExtensions .registerPath config - when providing file name w/o extension, Konteiner will search for variant with provided extension
-	 */
-
-	/**
-	 * @typedef RegisterPathOptions
-	 * @property {Array<string>=} exclude excludes files during  call by pattern
-	 * @property {Array<string>=} skipFiles exclude alias
-	 * @property {number=} dirSearchDepth how deep in subdirectories will Konteiner search for dependencies
-	 * 	1 = only current (default), -1 = all the way down
-	 * @property {Array<string>=} supportedExtensions when providing file name w/o extension, Konteiner will search for variant with provided extension
-	 * @property {string=} prefix string to prefix loaded dependecies names
-	 * @property {string=} suffix string to suffix loaded dependecies names
-	 * @property {Array<string>=} tags
-	 */
-
-	/**
-	 * @param {KonteinerOptions=} options
-	 */
-	static container(options) {return new Konteiner(options)}
 
 	/**
 	 * @param {KonteinerOptions=} options
@@ -41,25 +23,16 @@ class Konteiner {
 		this.exclude = options.exclude || options.skipFiles || []
 		this.searchDepth = options.dirSearchDepth || 1
 		this.supportedExtensions = options.supportedExtensions || ['.js']
-
-		this.refMap.add(new Ref('container', this))
-		this.refMap.add(new Ref('konteiner', this))
-
-		//aliases
-		this.load = this.registerPath
+		this._dependencyQueue = /** @type {Ref[]} */ ([])
 	}
 
 	/**
-	 * @param {string} depName dependency name
-	 * @param {any} implementation
+	 * @template T
+	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
 	 * @param {RegisterPathOptions=} options
 	 */
-	register(depName, implementation, options = {}) {
-		const {prefix, suffix, tags} = options
-		const usedDepName = (prefix || suffix )
-			? formatHelper.toCamelCase(`${prefix && prefix + '-' || ''}${depName}${suffix && '-' + suffix || ''}`)
-			: depName
-		this.refMap.add(new Ref(usedDepName, implementation), tags)
+	register(dependencyCreator, options = {}) {
+		this.refMap.add(dependencyCreator, null, options.tags)
 	}
 
 	/**
@@ -71,24 +44,33 @@ class Konteiner {
 		const searchDepth = options.dirSearchDepth || this.searchDepth
 		const supportedExtensions = options.supportedExtensions || this.supportedExtensions
 		const files = fsHelper.getFileListSync(path, {supportedExtensions, searchDepth})
-		const filesMap = fsHelper.transformFileListToDependenciesMap(files, exclude)
 
-		filesMap.forEach((path, depName) => {
-			const {prefix, suffix, tags} = options
-			const usedDepName = (prefix || suffix )
-				? formatHelper.toCamelCase(`${prefix && prefix + '-' || ''}${depName}${suffix && '-' + suffix || ''}`)
-				: depName
-			this.refMap.add(new Ref(usedDepName, require(path), path), tags)
-		})
+		files
+			.filter((path) => !(exclude.length && exclude.some((exclusion) => path.match(exclusion))))
+			.map((path) => [path, require(path)])
+			.filter(([, dependencyCreator]) => typeof dependencyCreator === 'function')
+			.forEach(([path, dependencyCreator]) => {
+				this.refMap.add(dependencyCreator, path, options.tags)
+			})
 	}
 
 	/**
-	 * @param {string} depName
+	 * @template T
+	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @returns {T}
 	 */
-	get(depName) {
-		const ref = this.refMap.get(depName)
-		if (!ref.isInitialized()) ref.initialize()
-		return ref.getInstance()
+	get(dependencyCreator) {
+		const ref = this.refMap.get(dependencyCreator)
+		if (!ref) throw new KonteinerNotRegisteredError(dependencyCreator)
+		const dependencyQueue = this._dependencyQueue
+		const requestedDependencyQueue = dependencyQueue.concat(ref)
+		if (dependencyQueue.includes(ref)) throw new KonteinerCyclicDepError(requestedDependencyQueue.map((ref) => ref.name))
+		if (this._dependencyQueue.length > 0) {
+			const dependentRef = this._dependencyQueue[this._dependencyQueue.length - 1]
+			dependentRef.dependenciesRefs.add(ref)
+		}
+
+		return ref.getInstance(Object.assign(Object.create(Object.getPrototypeOf(this)), this, {_dependencyQueue: requestedDependencyQueue}))
 	}
 
 	/**
@@ -97,26 +79,20 @@ class Konteiner {
 	 */
 	getByTag(tagName) {
 		const refs = this.refMap.getByTag(tagName)
-		return refs.map((ref) => {
-			if (!ref.isInitialized()) ref.initialize()
-			return ref.getInstance()
-		})
-
+		return refs.map((ref) => this.get(ref.dependencyCreator))
 	}
 
 	/**
-	 * @returns {Map<typeof Ref.toSimpleRef, typeof Ref.toSimpleRef[]>}
-	 */
-	getDependencyMap() {
-		return this.refMap.getDependencyMap()
-	}
-
-	/**
-	 * @param {string} depName
+	 * @template T
+	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
 	 * @returns {boolean}
 	 */
-	remove(depName) {
-		return this.refMap.remove(depName)
+	remove(dependencyCreator) {
+		return this.refMap.remove(dependencyCreator)
+	}
+
+	getDependencyMap() {
+		return this.refMap.getDependencyMap()
 	}
 }
 

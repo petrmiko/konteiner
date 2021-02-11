@@ -4,7 +4,7 @@ const {assert} = require('chai')
 const KonteinerNotRegisteredError = require('./not-registered-error')
 
 describe('KonteinerNotRegisteredError', function() {
-	const DEP = 'a'
+	const DEP = () => {}
 
 	it('Has correct error class', function() {
 		try {
@@ -18,7 +18,7 @@ describe('KonteinerNotRegisteredError', function() {
 		try {
 			throw new KonteinerNotRegisteredError(DEP)
 		} catch (error) {
-			assert.equal(error.message, `Dependency "${DEP}" is not registered`)
+			assert.equal(error.message, `Dependency "${DEP.name}" is not registered`)
 		}
 	})
 
@@ -26,7 +26,7 @@ describe('KonteinerNotRegisteredError', function() {
 		try {
 			throw new KonteinerNotRegisteredError(DEP)
 		} catch (error) {
-			assert.strictEqual(error.dependency, DEP)
+			assert.strictEqual(error.dependencyCreator, DEP)
 		}
 	})
 })

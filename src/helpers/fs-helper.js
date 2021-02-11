@@ -1,8 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-const {toCamelCase} = require('./format-helper')
-
 /**
  * @module FsHelper
  */
@@ -50,26 +48,6 @@ const getFileListSync = (startPath, config = {}, acc = [], currentDepth = 1) => 
 	}
 }
 
-/**
- * @param {Array<string>} fileList
- * @param {Array<string>=} exclusionList
- * @returns {Map<string, string>}
- */
-const transformFileListToDependenciesMap = (fileList, exclusionList = []) => {
-	return fileList.reduce((acc, fileName) => {
-		const baseName = path.basename(fileName)
-		if(!exclusionList.some((exclusion) => fileName.match(exclusion))) {
-			const noExtensionBaseName = path.parse(baseName).name
-			const camelCaseName = toCamelCase(noExtensionBaseName)
-			acc.set(camelCaseName, fileName)
-		}
-
-		return acc
-	}, new Map())
-}
-
 module.exports = {
 	getFileListSync,
-	transformFileListToDependenciesMap,
-	toCamelCase,
 }

@@ -1,18 +1,22 @@
 /**
+ * @typedef {import('../konteiner-types').DependencyCreator<any>} DependencyCreator
+ */
+
+/**
  * @extends Error
  */
 class KonteinerNotRegisteredError extends Error {
 
 	/**
-	 * @param {string} dependency
+	 * @param {DependencyCreator} dependencyCreator
 	 */
-	constructor(dependency) {
-		const message = `Dependency "${dependency}" is not registered`
+	constructor(dependencyCreator) {
+		const message = `Dependency "${dependencyCreator.name}" is not registered`
 		super(message)
 		this.name = this.constructor.name
 		Error.captureStackTrace(this, this.constructor)
 
-		this.dependency = dependency
+		this.dependencyCreator = dependencyCreator
 	}
 }
 

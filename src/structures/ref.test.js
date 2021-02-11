@@ -2,54 +2,25 @@ const {describe, it} = require('mocha')
 const {assert} = require('chai')
 const sinon = require('sinon')
 
+const Konteiner = require('../konteiner')
 const Ref = require('./ref')
+const KonteinerAnonymousNoPathDepCreatorError = require('../errors/anonymous-dep-no-path-creator-error')
 
 describe('Ref', function() {
 
-	describe('No init dependency', function() {
-		it('Provides string value as received', function() {
-			const STRING = '{testString}'
-			const ref = new Ref('{refName}', STRING)
+	const STUB_KONTEINER = sinon.createStubInstance(Konteiner)
 
-			assert.isTrue(ref.isInitialized())
-			assert.isEmpty(ref.getDependenciesNames())
-			assert.strictEqual(ref.getInstance(), STRING)
+	describe('Anonymous dependency creator support', function() {
+		it('Throws error for anonymous fn creator without source path', function() {
+			assert.throws(() => new Ref(() => {}), KonteinerAnonymousNoPathDepCreatorError)
 		})
 
-		it('Provides number value as received', function() {
-			const NUMBER = 42
-			const ref = new Ref('{refName}', NUMBER)
-
-			assert.isTrue(ref.isInitialized())
-			assert.isEmpty(ref.getDependenciesNames())
-			assert.strictEqual(ref.getInstance(), NUMBER)
-		})
-
-		it('Provides object value as received', function() {
-			const CONFIG = {
-				someValue: 1,
-				anotherValue: 2,
-			}
-			const ref = new Ref('{refName}', CONFIG)
-
-			assert.isTrue(ref.isInitialized())
-			assert.isEmpty(ref.getDependenciesNames())
-			assert.strictEqual(ref.getInstance(), CONFIG)
-		})
-
-		it('Initialize sets implementation to instance if not initialized, returs Ref', function() {
-			const STRING = '{testString}'
-			const ref = new Ref('{refName}', STRING)
-
-			assert.isTrue(ref.isInitialized())
-			assert.strictEqual(ref.initialize(), ref)
-			assert.strictEqual(ref.getInstance(), STRING)
-
-			// suppress initialized state to prevent early return - this should not occur
-			ref.initialized = false
-			assert.strictEqual(ref.initialize(), ref)
-			assert.isTrue(ref.isInitialized())
-			assert.strictEqual(ref.getInstance(), STRING)
+		it('No error for anonymous fn creator with source path, sets placeholder name', function() {
+			const ref = new Ref(() => {}, '{path}')
+			assert.deepInclude(ref, {
+				name: '{anonymous Fn}',
+				path: '{path}'
+			})
 		})
 	})
 
@@ -58,212 +29,113 @@ describe('Ref', function() {
 			const IMPLEMENTATION = '{someImplementation}'
 			const CALLABLE = () => IMPLEMENTATION
 
-			const ref = new Ref('{callable}', CALLABLE)
+			const ref = new Ref(CALLABLE)
 
-			assert.isFalse(ref.isInitialized())
-			assert.isUndefined(ref.getInstance())
+			assert.isFalse(ref.initialized)
+			assert.isUndefined(ref.instance)
 
-			assert.strictEqual(ref.initialize(), ref)
-			assert.isTrue(ref.isInitialized())
-			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
+			assert.strictEqual(ref.getInstance(STUB_KONTEINER), IMPLEMENTATION)
+			assert.strictEqual(ref.instance, IMPLEMENTATION)
+			assert.isTrue(ref.initialized)
 		})
 
-		it('Provides correct dependencies names', function() {
-			const CALLABLE = (dep1, dep2, dep3, dep4) => {} //eslint-disable-line no-unused-vars
-
-			const ref = new Ref('{callable}', CALLABLE)
-			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
-		})
-
-		it('Throws error, when not registered dependency instance', function() {
-			const CALLABLE = (unfulfilledDep) => {
-				unfulfilledDep.doSomething()
-			}
-			const ref = new Ref('{callable}', CALLABLE)
-			try {
-				ref.initialize()
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Provides initialized instance by dependencies', function() {
+		it('Provides konteiner instance for inner retrieving of other dependencies', function() {
 			const IMPLEMENTATION = '{someImplementation}'
-			const CALLABLE = (dep1, dep2) => {
-				dep1.doSomething()
-				dep2.doSomethingElse()
+
+			const DEP1_INSTANCE = {
+				doSomething: sinon.spy(),
+			}
+			const DEP2_INSTANCE = {
+				doSomethingElse: sinon.spy(),
+			}
+			const DEP1 = () => DEP1_INSTANCE
+			const DEP2 = () => DEP2_INSTANCE
+			const KONTEINER_STUB = sinon.createStubInstance(Konteiner)
+			KONTEINER_STUB.get.withArgs(DEP1).returns(DEP1_INSTANCE)
+			KONTEINER_STUB.get.withArgs(DEP2).returns(DEP2_INSTANCE)
+
+
+			const CALLABLE = /** @param {Konteiner} konteiner */ (konteiner) => {
+				konteiner.get(DEP1).doSomething()
+				konteiner.get(DEP2).doSomethingElse()
 				return IMPLEMENTATION
 			}
 
-			const ref = new Ref('{callable}', CALLABLE)
+			const ref = new Ref(CALLABLE)
+			assert.isFalse(ref.initialized)
+			assert.strictEqual(ref.getInstance(KONTEINER_STUB), IMPLEMENTATION)
 
-			const dep1 = {
-				doSomething: sinon.spy(),
-			}
-			const dep2 = {
-				doSomethingElse: sinon.spy(),
-			}
-
-			ref.setDependency(new Ref('dep1', () => dep1).initialize())
-			ref.setDependency(new Ref('dep2', () => dep2).initialize())
-			assert.strictEqual(ref.initialize(), ref)
-
-			assert.isTrue(ref.isInitialized())
-			assert.strictEqual(ref.getInstance(), IMPLEMENTATION)
-			sinon.assert.calledOnce(dep1.doSomething)
-			sinon.assert.calledOnce(dep2.doSomethingElse)
-		})
-	})
-
-	describe('Constructible dependency - common function', function() {
-		it('Is lazy initialized', function() {
-			const CONSTRUCTIBLE = function() {
-				const someFn = function() { return '{value}'}
-				return {someFn}
-			}
-
-			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-
-			assert.isFalse(ref.isInitialized())
-			assert.isUndefined(ref.getInstance())
-
-			assert.strictEqual(ref.initialize(), ref)
-			assert.isTrue(ref.isInitialized())
-			assert.equal(ref.getInstance().someFn(), '{value}')
-		})
-
-		it('Provides correct dependencies names', function() {
-			const CONSTRUCTIBLE = function(dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
-
-			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
-		})
-
-		it('Throws error, when not registered dependency instance', function() {
-			const CONSTRUCTIBLE = function(unfulfilledDep) {
-				unfulfilledDep.doSomething()
-			}
-			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-			try {
-				ref.initialize()
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Provides initialized instance by dependencies', function() {
-			const CONSTRUCTIBLE = function(dep1, dep2) {
-				dep1.doSomething()
-				dep2.doSomethingElse()
-				const someFn = function() { return '{value}'}
-
-				return {someFn}
-			}
-
-			const ref = new Ref('{constructible}', CONSTRUCTIBLE)
-
-			const dep1 = {
-				doSomething: sinon.spy(),
-			}
-			const dep2 = {
-				doSomethingElse: sinon.spy(),
-			}
-
-			ref.setDependency(new Ref('dep1', function() {return dep1}).initialize())
-			ref.setDependency(new Ref('dep2', function() {return dep2}).initialize())
-
-			assert.strictEqual(ref.initialize(), ref)
-
-			assert.isTrue(ref.isInitialized())
-			assert.equal(ref.getInstance().someFn(), '{value}')
-			sinon.assert.calledOnce(dep1.doSomething)
-			sinon.assert.calledOnce(dep2.doSomethingElse)
+			assert.isTrue(ref.initialized)
+			sinon.assert.calledOnce(DEP1_INSTANCE.doSomething)
+			sinon.assert.calledOnce(DEP2_INSTANCE.doSomethingElse)
 		})
 	})
 
 	describe('Constructible dependency - class', function() {
 		it('Is lazy initialized', function() {
 			class Constructible {
-				constructor() {}
+				constructor(konteiner) {
+					this.konteiner = konteiner
+				}
 
 				someFn() { return '{value}' }
 			}
+			const instance = new Constructible(STUB_KONTEINER)
 
-			const ref = new Ref('{constructible}', Constructible)
+			const ref = new Ref(Constructible)
 
-			assert.isFalse(ref.isInitialized())
-			assert.isUndefined(ref.getInstance())
+			assert.isFalse(ref.initialized)
+			assert.isUndefined(ref.instance)
+			assert.deepEqual(ref.getInstance(STUB_KONTEINER), instance)
 
-			assert.strictEqual(ref.initialize(), ref)
-			assert.isTrue(ref.isInitialized())
-			assert.isTrue(ref.getInstance() instanceof Constructible)
-			assert.equal(ref.getInstance().someFn(), '{value}')
+			assert.isTrue(ref.initialized)
+			assert.isTrue(ref.instance instanceof Constructible)
+			assert.deepEqual(ref.instance, instance)
+			assert.equal(ref.getInstance(STUB_KONTEINER).someFn(), '{value}')
 		})
 
-		it('Provides correct dependencies names', function() {
-			class Constructible {
-				constructor(dep1, dep2, dep3, dep4) {} //eslint-disable-line no-unused-vars
-			}
-
-			const ref = new Ref('{constructible}', Constructible)
-			assert.sameOrderedMembers(ref.getDependenciesNames(), ['dep1', 'dep2', 'dep3', 'dep4'])
-		})
-
-		it('Throws error, when not registered dependency instance', function() {
-			class Constructible {
-				constructor(unfulfilledDep) {
-					unfulfilledDep.doSomething()
-				}
-			}
-			const ref = new Ref('{constructible}', Constructible)
-			try {
-				ref.initialize()
-				assert.fail()
-			} catch (error) {
-				assert.equal(error.message, 'Missing dependencies! ["unfulfilledDep"]')
-			}
-		})
-
-		it('Provides initialized instance by dependencies', function() {
-			class Constructible {
-				constructor(dep1, dep2) {
-					dep1.doSomething()
-					dep2.doSomethingElse()
-				}
-
-				someFn() { return '{value}'}
-			}
-
-			const ref = new Ref('constructible', Constructible)
-
-			const dep1 = {
+		it('Provides konteiner instance for inner retrieving of other dependencies', function() {
+			const DEP1_INSTANCE = {
 				doSomething: sinon.spy(),
 			}
-			const dep2 = {
+			const DEP2_INSTANCE = {
 				doSomethingElse: sinon.spy(),
 			}
+			const DEP1 = () => DEP1_INSTANCE
+			const DEP2 = () => DEP2_INSTANCE
+			const KONTEINER_STUB = sinon.createStubInstance(Konteiner)
+			KONTEINER_STUB.get.withArgs(DEP1).returns(DEP1_INSTANCE)
+			KONTEINER_STUB.get.withArgs(DEP2).returns(DEP2_INSTANCE)
 
-			ref.setDependency(new Ref('dep1', () => dep1).initialize())
-			ref.setDependency(new Ref('dep2', () => dep2).initialize())
-			assert.strictEqual(ref.initialize(), ref)
-
-			assert.isTrue(ref.isInitialized())
-			assert.equal(ref.getInstance().someFn(), '{value}')
-			sinon.assert.calledOnce(dep1.doSomething)
-			sinon.assert.calledOnce(dep2.doSomethingElse)
-		})
-
-		it('Supports implicit constructor class dependency', function() {
 			class Constructible {
-				someFn() { return '{value}'}
-			}
+				/**
+				 * @param {Konteiner} konteiner
+				 */
+				constructor(konteiner) {
+					this.dep1 = konteiner.get(DEP1)
+					this.dep2 = konteiner.get(DEP2)
+				}
 
-			const ref = new Ref('constructible', Constructible)
-			assert.strictEqual(ref.initialize(), ref)
-			assert.isTrue(ref.isInitialized())
-			assert.equal(ref.getInstance().someFn(), '{value}')
+				someFn() {
+					this.dep1.doSomething()
+					this.dep2.doSomethingElse()
+				}
+			}
+			const instance = new Constructible(KONTEINER_STUB)
+
+			const ref = new Ref(Constructible)
+
+			assert.isFalse(ref.initialized)
+			assert.deepEqual(ref.getInstance(KONTEINER_STUB), instance)
+
+			assert.isTrue(ref.initialized)
+			assert.isTrue(ref.instance instanceof Constructible)
+			assert.deepEqual(ref.instance, instance)
+
+			ref.instance.someFn()
+			sinon.assert.calledOnce(DEP1_INSTANCE.doSomething)
+			sinon.assert.calledOnce(DEP2_INSTANCE.doSomethingElse)
 		})
+
 	})
 })

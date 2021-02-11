@@ -4,6 +4,7 @@ const sinon = require('sinon')
 
 const Ref = require('./ref')
 const RefMap = require('./ref-map')
+const SimpleRef = require('./simple-ref')
 
 describe('RefMap', function() {
 
@@ -21,81 +22,71 @@ describe('RefMap', function() {
 		it('Stores reference and updates its dependencies refs by existing mapping', function(){
 			const refMap = new RefMap()
 
-			const Logger = {log: sinon.spy()}
-			const Messenger = function(logger) {
+			const Logger = () => ({log: sinon.spy()})
+			const Messenger = /** @param {import('../konteiner')} konteiner */ function(konteiner) {
+				const logger = konteiner.get(Logger)
 				return {
 					sendMessage(text) {logger.log(text)}
 				}
 			}
-			const loggerRef = new Ref('logger', Logger)
-			const messengerRef = new Ref('messenger', Messenger)
+			const loggerRef = new Ref(Logger)
+			const messengerRef = new Ref(Messenger)
 
 			// before registering logger
-			assert.throws(() => refMap.get('logger'), 'Dependency "logger" is not registered')
-			assert.throws(() => refMap.get('messenger'), 'Dependency "messenger" is not registered')
-			assert.isUndefined(messengerRef.dependenciesRefs.get('logger'))
+			assert.isUndefined(refMap.get(Logger))
+			assert.isUndefined(refMap.get(Messenger))
 
 			// logger registered
-			refMap.add(loggerRef, ['logging'])
-			assert.strictEqual(refMap.get('logger'), loggerRef)
-			assert.sameMembers(refMap.getByTag('logging'), [loggerRef])
-			assert.isUndefined(messengerRef.dependenciesRefs.get('logger'))
+			refMap.add(Logger, null, ['logging'])
+			assert.deepEqual(refMap.get(Logger), loggerRef)
+			assert.sameDeepMembers(refMap.getByTag('logging'), [loggerRef])
 
 			// messenger registered
-			refMap.add(messengerRef, ['messaging'])
-			assert.strictEqual(refMap.get('logger'), loggerRef)
-			assert.sameMembers(refMap.getByTag('logging'), [loggerRef])
-			assert.strictEqual(refMap.get('messenger'), messengerRef)
-			assert.sameMembers(refMap.getByTag('messaging'), [messengerRef])
-			assert.strictEqual(messengerRef.dependenciesRefs.get('logger'), loggerRef)
+			refMap.add(Messenger, null, ['messaging'])
+			assert.deepEqual(refMap.get(Logger), loggerRef)
+			assert.sameDeepMembers(refMap.getByTag('logging'), [loggerRef])
+			assert.deepEqual(refMap.get(Messenger), messengerRef)
+			assert.sameDeepMembers(refMap.getByTag('messaging'), [messengerRef])
 		})
 
 		it('Readdition - same ref - logged console hint', function() {
+			const PATH = '{testPath}'
 			const refMap = new RefMap()
-			const ref = new Ref('a', () => {}, '{testPath}')
+			const Logger = () => ({log: sinon.spy()})
 
-			refMap.add(ref)
-			refMap.add(ref)
+			const ref = new Ref(Logger, PATH)
+
+			refMap.add(Logger, PATH)
+			refMap.add(Logger, PATH)
 
 			sinon.assert.calledOnce(logStub)
-			sinon.assert.calledWithExactly(logStub, 'Attempt to re-add', Ref.toSimpleRef(ref), ', ignoring...')
+			sinon.assert.calledWith(logStub, 'Attempt to re-add', new SimpleRef(ref), ', ignoring...')
 		})
 
 		it('Readdition - different ref path - logged console hint', function() {
 			const refMap = new RefMap()
-			const ref1 = new Ref('a', () => {}, '{testPath}')
-			const ref2 = new Ref('a', () => {}, '{testPathNew}')
+			const Logger = () => ({log: sinon.spy()})
 
-			refMap.add(ref1)
-			refMap.add(ref2)
+			const ref1 = new Ref(Logger, '{testPath}')
+			const ref2 = new Ref(Logger, '{testPathNew}')
+
+			refMap.add(Logger, '{testPath}')
+			refMap.add(Logger, '{testPathNew}')
+
 
 			sinon.assert.calledOnce(logStub)
-			sinon.assert.calledWithExactly(logStub, 'Overriding', Ref.toSimpleRef(ref1), 'with', Ref.toSimpleRef(ref2))
+			sinon.assert.calledWithExactly(logStub, 'Overriding', new SimpleRef(ref1), 'with', new SimpleRef(ref2))
 		})
 	})
 
 	describe('get', function() {
-		it('Throws error when no such dependency', function() {
+		it('Just passes data from refsByCreator', function() {
 			const refMap = new RefMap()
+			const DEP_CREATOR = () => {}
+			const DEP_REF = new Ref(DEP_CREATOR)
+			refMap.refsByCreator.set(DEP_CREATOR, DEP_REF)
 
-			assert.throws(() => refMap.get('unregisteredDependency'), 'Dependency "unregisteredDependency" is not registered')
-		})
-
-		it('Throws error when found cyclic dependency upon get', function() {
-			const refMap = new RefMap()
-
-			const a = (b) => {} //eslint-disable-line no-unused-vars
-			const b = (c) => {} //eslint-disable-line no-unused-vars
-			const c = (a) => {} //eslint-disable-line no-unused-vars
-
-			// no errors during addition
-			refMap.add(new Ref('a', a))
-			refMap.add(new Ref('b', b))
-			refMap.add(new Ref('c', c))
-
-			assert.throws(() => refMap.get('a'), 'Cyclic dependency found! ["a"->"b"->"c"->"a"]')
-			assert.throws(() => refMap.get('b'), 'Cyclic dependency found! ["b"->"c"->"a"->"b"]')
-			assert.throws(() => refMap.get('c'), 'Cyclic dependency found! ["c"->"a"->"b"->"c"]')
+			assert.strictEqual(refMap.get(DEP_CREATOR), DEP_REF)
 		})
 	})
 
@@ -105,35 +96,31 @@ describe('RefMap', function() {
 			assert.throws(() => refMap.getByTag('tagWithoutDependencies'), 'No dependency with tag "tagWithoutDependencies" is registered')
 		})
 
-		it('Throws error when found cyclic dependency upon get', function() {
+		it('Returns all refs for registered tag', function() {
 			const refMap = new RefMap()
+			const DEP_CREATOR = () => {}
 			const TAG = '{tag}'
+			const REFS = [new Ref(DEP_CREATOR), new Ref(DEP_CREATOR)]
 
-			const a = (b) => {} //eslint-disable-line no-unused-vars
-			const b = (c) => {} //eslint-disable-line no-unused-vars
-			const c = (a) => {} //eslint-disable-line no-unused-vars
+			refMap.refsByTag.set(TAG, REFS)
 
-			// no errors during addition
-			refMap.add(new Ref('a', a), [TAG])
-			refMap.add(new Ref('b', b), [TAG])
-			refMap.add(new Ref('c', c), [TAG])
-
-			assert.throws(() => refMap.getByTag(TAG), 'Cyclic dependency found! ["a"->"b"->"c"->"a"]')
+			assert.strictEqual(refMap.getByTag(TAG), REFS)
 		})
 
 		it('Provides registered refs', function() {
 			const refMap = new RefMap()
 			const TAG = '{tag}'
 
-			const refA = new Ref('a', () => 'a')
-			const refB = new Ref('b', () => 'b')
-			const refC = new Ref('c', () => 'c')
+			const DEP_CREATOR_A = () => 'a'
+			const DEP_CREATOR_B = () => 'b'
 
-			refMap.add(refA, [TAG])
-			refMap.add(refB, [TAG])
-			refMap.add(refC, [TAG])
+			const refA = new Ref(DEP_CREATOR_A)
+			const refB = new Ref(DEP_CREATOR_B)
 
-			assert.sameMembers(refMap.getByTag(TAG), [refA, refB, refC])
+			refMap.add(DEP_CREATOR_A, null, [TAG])
+			refMap.add(DEP_CREATOR_B, null, [TAG])
+
+			assert.sameDeepMembers(refMap.getByTag(TAG), [refA, refB])
 		})
 	})
 
@@ -142,56 +129,60 @@ describe('RefMap', function() {
 			const refMap = new RefMap()
 			const TAG = '{tag}'
 
-			const refA = new Ref('a', () => 'a')
-			const refB = new Ref('b', () => 'b')
-			refMap.add(refA, [TAG])
-			refMap.add(refB, [TAG])
+			const DEP_CREATOR_A = () => 'a'
+			const DEP_CREATOR_B = () => 'b'
 
-			assert.isTrue(refMap.remove('a'))
-			assert.throws(() => refMap.get('a'), 'Dependency "a" is not registered')
-			assert.strictEqual(refMap.get('b'), refB)
-			assert.sameMembers(refMap.getByTag(TAG), [refB])
+			const refB = new Ref(DEP_CREATOR_B)
 
-			assert.deepEqual(refMap.getDependencyMap(), new Map([
-				[undefined, [Ref.toSimpleRef(refB)]],
-			]))
+			refMap.add(DEP_CREATOR_A, null, [TAG])
+			refMap.add(DEP_CREATOR_B, null, [TAG])
+
+			assert.isTrue(refMap.remove(DEP_CREATOR_A))
+			assert.isUndefined(refMap.get(DEP_CREATOR_A))
+			assert.deepEqual(refMap.get(DEP_CREATOR_B), refB)
+			assert.sameDeepMembers(refMap.getByTag(TAG), [refB])
 		})
 
 		it('Does nothing to registered refs and provides failure flag for non-registered dep removal', function() {
 			const refMap = new RefMap()
 			const TAG = '{tag}'
 
-			const refA = new Ref('a', () => 'a')
-			const refB = new Ref('b', () => 'b')
-			refMap.add(refA, [TAG])
-			refMap.add(refB, [TAG])
+			const DEP_CREATOR_A = () => 'a'
+			const DEP_CREATOR_B = () => 'b'
+			const DEP_CREATOR_C = () => 'c'
 
-			assert.isFalse(refMap.remove('c'))
-			assert.strictEqual(refMap.get('a'), refA)
-			assert.strictEqual(refMap.get('b'), refB)
-			assert.sameMembers(refMap.getByTag(TAG), [refA, refB])
+			const refA = new Ref(DEP_CREATOR_A)
+			const refB = new Ref(DEP_CREATOR_B)
+			refMap.add(DEP_CREATOR_A, null, [TAG])
+			refMap.add(DEP_CREATOR_B, null, [TAG])
 
-			assert.deepEqual(refMap.getDependencyMap(), new Map([
-				[undefined, [Ref.toSimpleRef(refA), Ref.toSimpleRef(refB)]],
-			]))
+			assert.isFalse(refMap.remove(DEP_CREATOR_C))
+			assert.deepEqual(refMap.get(DEP_CREATOR_A), refA)
+			assert.deepEqual(refMap.get(DEP_CREATOR_B), refB)
+			assert.sameDeepMembers(refMap.getByTag(TAG), [refA, refB])
 		})
 	})
 
 	describe('getDependencyMap', function() {
-		it('Provides simplified overview of where is ref provided into as dependency', function() {
+		it('Provides simplified map', function() {
 			const refMap = new RefMap()
 
-			const refA = new Ref('a', (b) => 'a') // eslint-disable-line no-unused-vars
-			const refB = new Ref('b', () => 'b')
-			const refC = new Ref('c', (a, b) => 'c') // eslint-disable-line no-unused-vars
-			refMap.add(refA)
-			refMap.add(refB)
-			refMap.add(refC)
+			const DEP_CREATOR_A = () => {}
+			const DEP_CREATOR_B = () => {}
+			const DEP_CREATOR_C = () => {}
+
+			refMap.add(DEP_CREATOR_A)
+			refMap.add(DEP_CREATOR_B)
+			refMap.add(DEP_CREATOR_C)
+
+			// this linking is otherwise done during instantiating process
+			refMap.get(DEP_CREATOR_A).dependenciesRefs.add(refMap.get(DEP_CREATOR_B))
+			refMap.get(DEP_CREATOR_B).dependenciesRefs.add(refMap.get(DEP_CREATOR_C))
 
 			assert.deepEqual(refMap.getDependencyMap(), new Map([
-				[undefined, [Ref.toSimpleRef(refB)]],
-				[Ref.toSimpleRef(refA), [Ref.toSimpleRef(refC)]],
-				[Ref.toSimpleRef(refB), [Ref.toSimpleRef(refA), Ref.toSimpleRef(refC)]],
+				[DEP_CREATOR_A, new SimpleRef(refMap.get(DEP_CREATOR_A))],
+				[DEP_CREATOR_B, new SimpleRef(refMap.get(DEP_CREATOR_B))],
+				[DEP_CREATOR_C, new SimpleRef(refMap.get(DEP_CREATOR_C))],
 			]))
 		})
 	})

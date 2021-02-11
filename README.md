@@ -4,8 +4,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/petrmiko/konteiner/badge.svg)](https://coveralls.io/github/petrmiko/konteiner)
 
 This module provides you means to:
-- register desired modules (objects, functions, classes) to DI container
-- use the initialized dependencies in modules by obtaining them from constructor/parent function
+- register desired instantiable modules (functions, classes) to DI container
+- use the initialized dependencies in modules by obtaining them via getter on Konteiner instance, that is provided via constructor/parent function
 - having the modules initialized in lazy manner, ie. on first konteiner.get call
 
 ## Usage
@@ -17,15 +17,20 @@ This module provides you means to:
 const Konteiner = require('@petrmiko/konteiner')
 
 const konteiner = new Konteiner()
-// following lines will just register dependencies, init is made upon first get for affected dependencies
-konteiner.register('logger', () => console)
-konteiner.register('demoMessenger', (logger) => {
+
+// first we need to have some instance creators, here functions
+const Logger = () => console
+const Messenger = /** @type {Konteiner} */ (konteiner) => {
+	const logger = konteiner.get(Logger)
 	return {
 		sendMessage(text) { logger.log(text) }
 	}
-})
+}
+// following lines will just register dependencies, init is made upon first get for affected dependencies
+konteiner.register(Logger)
+konteiner.register(Messenger)
 
-const messenger = konteiner.get('demoMessenger') // this will actually invoke the constructor of demoMessenger (and logger, since it is a dependency of demoMessenger)
+const messenger = konteiner.get(Messenger) // this will actually invoke the constructor of Messenger (and Logger, since it is a dependency of demoMessenger)
 messenger.sendMessage('Hello world!') // console.log will print out 'Hello world!'
 ```
 
@@ -41,7 +46,10 @@ konteiner.registerPath('./src', {exclude: [
 	'index\\.js'
 ]}) // all but tests and index.js will be loaded. Overrides exclude from constructor for this call only
 
-const someService = konteiner.get('someService') // all dependencies bound to someService will be now initialized
+// then in place of use we need to know, what dependency creator was used to retrieve its instance
+const Service = require('./src/service')
+
+const someService = konteiner.get(Service) // all dependencies bound to Service will be now initialized
 ...
 ```
 
