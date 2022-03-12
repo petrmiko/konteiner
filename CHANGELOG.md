@@ -3,6 +3,10 @@ In this file will be described latest changes in Konteiner package.
 
 ## Unreleased
 
+## 2.1.0
+- Breaking
+    - uses package-lock.json lockfileVersion v2
+
 ## 2.0.0
 - Breaking
     - removed static `Konteiner.container` instance creator, use new instead
