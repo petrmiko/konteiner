@@ -8,6 +8,7 @@ out
 
 # additional ignores for NPM
 .vscode
+.husky
 test
 **/*.test.js
 .nvmrc
