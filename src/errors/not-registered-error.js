@@ -1,11 +1,11 @@
 /**
- * @typedef {import('../konteiner-types').DependencyCreator<any>} DependencyCreator
+ * @typedef {import('../konteiner-types.js').DependencyCreator<any>} DependencyCreator
  */
 
 /**
  * @extends Error
  */
-class KonteinerNotRegisteredError extends Error {
+export default class KonteinerNotRegisteredError extends Error {
 
 	/**
 	 * @param {DependencyCreator} dependencyCreator
@@ -19,5 +19,3 @@ class KonteinerNotRegisteredError extends Error {
 		this.dependencyCreator = dependencyCreator
 	}
 }
-
-module.exports = KonteinerNotRegisteredError

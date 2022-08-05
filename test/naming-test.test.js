@@ -1,4 +1,4 @@
-const {describe, it} = require('mocha')
+import {describe, it} from 'mocha'
 
 describe.skip('Naming test', function() {
 

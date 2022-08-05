@@ -1,9 +1,9 @@
-const {describe, it, before, after} = require('mocha')
-const {assert} = require('chai')
-const mockFs = require('mock-fs')
-const path = require('path')
+import {describe, it, before, after} from 'mocha'
+import {assert} from 'chai'
+import mockFs from 'mock-fs'
+import path from 'node:path'
 
-const fsHelper = require('./fs-helper')
+import fsHelper from './fs-helper.js'
 
 describe('FS Helper', function() {
 

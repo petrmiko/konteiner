@@ -1,7 +1,7 @@
-const {describe, it} = require('mocha')
-const {assert} = require('chai')
+import {describe, it} from 'mocha'
+import {assert} from 'chai'
 
-const KonteinerNotRegisteredTagError = require('./not-registered-tag-error')
+import KonteinerNotRegisteredTagError from './not-registered-tag-error.js'
 
 describe('KonteinerNotRegisteredTagError', function() {
 	const TAG = '{tag}'

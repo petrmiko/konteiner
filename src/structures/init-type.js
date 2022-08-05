@@ -1,6 +1,7 @@
-const INIT_TYPE = {
-	CALLABLE: 'Callable',
-	CONSTRUCTIBLE: 'Constructible',
-}
+export const CALLABLE = 'Callable'
+export const CONSTRUCTIBLE = 'Constructible'
 
-module.exports = Object.freeze(INIT_TYPE)
+export default {
+	CALLABLE,
+	CONSTRUCTIBLE
+}

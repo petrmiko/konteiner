@@ -1,12 +1,13 @@
-const {describe, it} = require('mocha')
-const {assert} = require('chai')
-const path = require('path')
-const sinon = require('sinon')
+import path from 'node:path'
 
-const Konteiner = require('./konteiner')
-const Ref = require('./structures/ref')
-const KonteinerNotRegisteredError = require('./errors/not-registered-error')
-const KonteinerCyclicDepError = require('./errors/cyclic-dep-error')
+import {describe, it} from 'mocha'
+import {assert} from 'chai'
+import sinon from 'sinon'
+
+import Konteiner from './konteiner.js'
+import Ref from './structures/ref.js'
+import KonteinerNotRegisteredError from './errors/not-registered-error.js'
+import KonteinerCyclicDepError from './errors/cyclic-dep-error.js'
 
 describe('Konteiner', function() {
 
@@ -158,55 +159,58 @@ describe('Konteiner', function() {
 		describe('registerPath', function() {
 			const TEST_FILES_DIR = path.join(global.process.cwd(), 'test')
 
-			it('no options - loads all .js files to depth 1 (=specified dir only)', function() {
+			const loadDep = async (path) => import(path).then(dep => dep.default)
+
+			it('no options - loads all .js files to depth 1 (=specified dir only)', async function() {
 				const konteiner = new Konteiner()
 				const refMapAdd = sinon.stub(konteiner.refMap, 'add')
 
-				konteiner.registerPath(TEST_FILES_DIR)
+				await konteiner.registerPath(TEST_FILES_DIR)
 				sinon.assert.calledTwice(refMapAdd)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test-class'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.js'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test-class.js'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
 			})
 
-			it('options.dirSearchDepth - -1 loads all .js files recursively', function() {
+			it('options.dirSearchDepth - -1 loads all .js files recursively', async function() {
 				const konteiner = new Konteiner()
 				const refMapAdd = sinon.stub(konteiner.refMap, 'add')
 
-				konteiner.registerPath(TEST_FILES_DIR, {dirSearchDepth: -1})
+				await konteiner.registerPath(TEST_FILES_DIR, {dirSearchDepth: -1})
 				sinon.assert.callCount(refMapAdd, 3)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/nested/nested-naming-test'), path.join(TEST_FILES_DIR, 'nested', 'nested-naming-test.js'), undefined)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test-class'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/nested/nested-naming-test.js'), path.join(TEST_FILES_DIR, 'nested', 'nested-naming-test.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.js'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test-class.js'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
 			})
 
-			it('options.supportedExtensions - loads all supported extensions (so nodejs require handles them)', function() {
+			it('options.supportedExtensions - loads all supported extensions (so nodejs require handles them)', async function() {
 				const konteiner = new Konteiner()
 				const refMapAdd = sinon.stub(konteiner.refMap, 'add')
 
-				konteiner.registerPath(TEST_FILES_DIR, {supportedExtensions: ['.js', '.jsx']})
-				sinon.assert.callCount(refMapAdd, 3)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test.jsx'), path.join(TEST_FILES_DIR, 'naming-test.jsx'), undefined)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test-class'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
+				await konteiner.registerPath(TEST_FILES_DIR, {supportedExtensions: ['.js', '.mjs', '.cjs']})
+				sinon.assert.callCount(refMapAdd, 4)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.js'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.mjs'), path.join(TEST_FILES_DIR, 'naming-test.mjs'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.cjs'), path.join(TEST_FILES_DIR, 'naming-test.cjs'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test-class.js'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), undefined)
 			})
 
-			it('options.exclude - loads all files not matching exclude patterns', function() {
+			it('options.exclude - loads all files not matching exclude patterns', async function() {
 				const konteiner = new Konteiner()
 				const refMapAdd = sinon.stub(konteiner.refMap, 'add')
 
-				konteiner.registerPath(TEST_FILES_DIR, {exclude: ['\\-class\\.']})
+				await konteiner.registerPath(TEST_FILES_DIR, {exclude: ['\\-class\\.']})
 				sinon.assert.callCount(refMapAdd, 1)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.js'), path.join(TEST_FILES_DIR, 'naming-test.js'), undefined)
 			})
 
-			it('options.tags - loads all .js files with tags', function() {
+			it('options.tags - loads all .js files with tags', async function() {
 				const konteiner = new Konteiner()
 				const refMapAdd = sinon.stub(konteiner.refMap, 'add')
 
-				konteiner.registerPath(TEST_FILES_DIR, {tags: ['test', 'tag']})
+				await konteiner.registerPath(TEST_FILES_DIR, {tags: ['test', 'tag']})
 				sinon.assert.calledTwice(refMapAdd)
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test'), path.join(TEST_FILES_DIR, 'naming-test.js'), ['test', 'tag'])
-				sinon.assert.calledWithExactly(refMapAdd, require('../test/naming-test-class'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), ['test', 'tag'])
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test.js'), path.join(TEST_FILES_DIR, 'naming-test.js'), ['test', 'tag'])
+				sinon.assert.calledWithExactly(refMapAdd, await loadDep('../test/naming-test-class.js'), path.join(TEST_FILES_DIR, 'naming-test-class.js'), ['test', 'tag'])
 			})
 		})
 

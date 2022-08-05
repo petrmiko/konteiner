@@ -1,11 +1,11 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "ES6",
         "allowJs": true,
         "checkJs": true,
-        "resolveJsonModule": true,
         "noEmit": true,
         "pretty": true,
+        "moduleResolution": "node16"
     },
     "include": [
         "src",
@@ -14,6 +14,5 @@
     "exclude": [
         "tsconfig.json",
     ],
-    "lib": ["es2015"],
     "types": ["node"]
 }

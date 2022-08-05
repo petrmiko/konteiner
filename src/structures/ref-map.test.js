@@ -1,10 +1,10 @@
-const {describe, it, beforeEach, afterEach} = require('mocha')
-const {assert} = require('chai')
-const sinon = require('sinon')
+import {describe, it, beforeEach, afterEach} from 'mocha'
+import {assert} from 'chai'
+import sinon from 'sinon'
 
-const Ref = require('./ref')
-const RefMap = require('./ref-map')
-const SimpleRef = require('./simple-ref')
+import Ref from './ref.js'
+import RefMap from './ref-map.js'
+import SimpleRef from './simple-ref.js'
 
 describe('RefMap', function() {
 
@@ -23,7 +23,7 @@ describe('RefMap', function() {
 			const refMap = new RefMap()
 
 			const Logger = () => ({log: sinon.spy()})
-			const Messenger = /** @param {import('../konteiner')} konteiner */ function(konteiner) {
+			const Messenger = /** @param {import('../konteiner.js').default} konteiner */ function(konteiner) {
 				const logger = konteiner.get(Logger)
 				return {
 					sendMessage(text) {logger.log(text)}

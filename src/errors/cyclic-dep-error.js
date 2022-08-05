@@ -1,7 +1,7 @@
 /**
  * @extends Error
  */
-class KonteinerCyclicDepError extends Error {
+export default class KonteinerCyclicDepError extends Error {
 
 	/**
 	 * @param {string[]} dependencies
@@ -19,5 +19,3 @@ class KonteinerCyclicDepError extends Error {
 		this.dependencies = dependencies
 	}
 }
-
-module.exports = KonteinerCyclicDepError

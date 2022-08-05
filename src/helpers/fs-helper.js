@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'node:fs'
+import path from 'node:path'
 
 /**
  * @module FsHelper
@@ -48,6 +48,6 @@ const getFileListSync = (startPath, config = {}, acc = [], currentDepth = 1) => 
 	}
 }
 
-module.exports = {
+export default {
 	getFileListSync,
 }

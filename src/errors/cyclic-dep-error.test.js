@@ -1,7 +1,7 @@
-const {describe, it} = require('mocha')
-const {assert} = require('chai')
+import {describe, it} from 'mocha'
+import {assert} from 'chai'
 
-const KonteinerCyclicDepError = require('./cyclic-dep-error')
+import KonteinerCyclicDepError from './cyclic-dep-error.js'
 
 describe('KonteinerCyclicDepError', function() {
 	const DEPS = ['a', 'b', 'c', 'a']

@@ -1,7 +1,7 @@
-const {describe, it} = require('mocha')
-const {assert} = require('chai')
+import {describe, it} from 'mocha'
+import {assert} from 'chai'
 
-const KonteinerNotRegisteredError = require('./not-registered-error')
+import KonteinerNotRegisteredError from'./not-registered-error.js'
 
 describe('KonteinerNotRegisteredError', function() {
 	const DEP = () => {}

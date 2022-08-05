@@ -1,17 +1,17 @@
-const Ref = require('./ref')
-const KonteinerNotRegisteredTagError = require('../errors/not-registered-tag-error')
-const SimpleRef = require('./simple-ref')
+import Ref from './ref.js'
+import KonteinerNotRegisteredTagError from '../errors/not-registered-tag-error.js'
+import SimpleRef from './simple-ref.js'
 
-class RefMap {
+export default class RefMap {
 
 	constructor() {
-		this.refsByCreator = /** @type {Map<import('../konteiner-types').DependencyCreator<any>, Ref>} */ (new Map())
+		this.refsByCreator = /** @type {Map<import('../konteiner-types.js').DependencyCreator<any>, Ref>} */ (new Map())
 		this.refsByTag = /** @type {Map<string, Array<Ref>>} */ (new Map())
 	}
 
 	/**
 	 * @template T
-	 * @param {import('../konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('../konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @param {string} [path]
 	 * @param {Array<string>} [tags]
 	 */
@@ -40,7 +40,7 @@ class RefMap {
 
 	/**
 	 * @template T
-	 * @param {import('../konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('../konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @returns {Ref<T>}
 	 */
 	get(dependencyCreator) {
@@ -59,7 +59,7 @@ class RefMap {
 
 	/**
 	 * @template T
-	 * @param {import('../konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('../konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @returns {boolean}
 	 */
 	remove(dependencyCreator) {
@@ -81,5 +81,3 @@ class RefMap {
 		]))
 	}
 }
-
-module.exports = RefMap

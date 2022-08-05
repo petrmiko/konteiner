@@ -1,13 +1,13 @@
-const {CALLABLE, CONSTRUCTIBLE} = require('./init-type')
-const KonteinerAnonymousNoPathDepCreatorError = require('../errors/anonymous-dep-no-path-creator-error')
+import {CALLABLE, CONSTRUCTIBLE} from './init-type.js'
+import KonteinerAnonymousNoPathDepCreatorError from '../errors/anonymous-dep-no-path-creator-error.js'
 
 /**
  * @template T
  */
 
-class Ref {
+export default class Ref {
 	/**
-	 * @param {import('../konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('../konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @param {string=} path
 	 */
 	constructor(dependencyCreator, path) {
@@ -31,7 +31,7 @@ class Ref {
 	}
 
 	/**
-	 * @param {import('../konteiner')} konteiner
+	 * @param {import('../konteiner.js')} konteiner
 	 * @returns {T} dependency instance
 	 */
 	getInstance(konteiner) {
@@ -49,5 +49,3 @@ class Ref {
 		return this.instance
 	}
 }
-
-module.exports = Ref

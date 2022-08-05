@@ -2,7 +2,8 @@
   "name": "@petrmiko/konteiner",
   "version": "2.1.1",
   "description": "Simple DI container for node.js applications",
-  "main": "index.js",
+  "type": "module",
+  "exports": "./index.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com:petrmiko/konteiner.git"

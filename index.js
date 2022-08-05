@@ -1,3 +1,4 @@
-const Konteiner = require('./src/konteiner')
+import Konteiner from from './src/konteiner'
 
-module.exports = Konteiner
+export Konteiner
+export default Konteiner

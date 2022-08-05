@@ -1,6 +1,6 @@
-module.exports = class SimpleRef {
+export default class SimpleRef {
 	/**
-	 * @param {import('./ref')} ref
+	 * @param {import('./ref.js').default} ref
 	 */
 	constructor(ref) {
 		this.name = ref.name

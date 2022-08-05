@@ -1,18 +1,18 @@
-const fsHelper = require('./helpers/fs-helper')
+import fsHelper from './helpers/fs-helper.js'
 
-const Ref = require('./structures/ref') // eslint-disable-line no-unused-vars
-const RefMap = require('./structures/ref-map')
+import Ref from './structures/ref.js' // eslint-disable-line no-unused-vars
+import RefMap from './structures/ref-map.js'
 
-const KonteinerCyclicDepError = require('./errors/cyclic-dep-error')
-const KonteinerNotRegisteredError = require('./errors/not-registered-error')
+import KonteinerCyclicDepError from './errors/cyclic-dep-error.js'
+import KonteinerNotRegisteredError from './errors/not-registered-error.js'
 
 /**
- * @typedef {import('./konteiner-types').KonteinerOptions} KonteinerOptions
- * @typedef {import('./konteiner-types').RegisterOptions} RegisterOptions
- * @typedef {import('./konteiner-types').RegisterPathOptions} RegisterPathOptions
+ * @typedef {import('./konteiner-types.js').KonteinerOptions} KonteinerOptions
+ * @typedef {import('./konteiner-types.js').RegisterOptions} RegisterOptions
+ * @typedef {import('./konteiner-types.js').RegisterPathOptions} RegisterPathOptions
  */
 
-class Konteiner {
+export default class Konteiner {
 
 	/**
 	 * @param {KonteinerOptions=} options
@@ -28,7 +28,7 @@ class Konteiner {
 
 	/**
 	 * @template T
-	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('./konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @param {RegisterPathOptions=} options
 	 */
 	register(dependencyCreator, options = {}) {
@@ -39,24 +39,25 @@ class Konteiner {
 	 * @param {string} path
 	 * @param {RegisterPathOptions=} options
 	 */
-	registerPath(path, options = {}) {
+	async registerPath(path, options = {}) {
 		const exclude = options.exclude || options.skipFiles || this.exclude
 		const searchDepth = options.dirSearchDepth || this.searchDepth
 		const supportedExtensions = options.supportedExtensions || this.supportedExtensions
 		const files = fsHelper.getFileListSync(path, {supportedExtensions, searchDepth})
 
-		files
-			.filter((path) => !(exclude.length && exclude.some((exclusion) => path.match(exclusion))))
-			.map((path) => [path, require(path)])
-			.filter(([, dependencyCreator]) => typeof dependencyCreator === 'function')
-			.forEach(([path, dependencyCreator]) => {
-				this.refMap.add(dependencyCreator, path, options.tags)
-			})
+		for (let file of files) {
+			if (exclude.length && exclude.some((exclusion) => file.match(exclusion))) continue
+			
+			const {default: dependencyCreator} = await import(file)
+			if (typeof dependencyCreator === 'function') {
+				this.refMap.add(dependencyCreator, file, options.tags)
+			}
+		}
 	}
 
 	/**
 	 * @template T
-	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('./konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @returns {T}
 	 */
 	get(dependencyCreator) {
@@ -84,7 +85,7 @@ class Konteiner {
 
 	/**
 	 * @template T
-	 * @param {import('./konteiner-types').DependencyCreator<T>} dependencyCreator
+	 * @param {import('./konteiner-types.js').DependencyCreator<T>} dependencyCreator
 	 * @returns {boolean}
 	 */
 	remove(dependencyCreator) {
@@ -95,5 +96,3 @@ class Konteiner {
 		return this.refMap.getDependencyMap()
 	}
 }
-
-module.exports = Konteiner

@@ -1,10 +1,10 @@
-const {describe, it} = require('mocha')
-const {assert} = require('chai')
-const sinon = require('sinon')
+import {describe, it} from 'mocha'
+import {assert} from 'chai'
+import sinon from 'sinon'
 
-const Konteiner = require('../konteiner')
-const Ref = require('./ref')
-const KonteinerAnonymousNoPathDepCreatorError = require('../errors/anonymous-dep-no-path-creator-error')
+import Konteiner from '../konteiner.js'
+import Ref from './ref.js'
+import KonteinerAnonymousNoPathDepCreatorError from '../errors/anonymous-dep-no-path-creator-error.js'
 
 describe('Ref', function() {
 

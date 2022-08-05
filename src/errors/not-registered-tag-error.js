@@ -1,7 +1,7 @@
 /**
  * @extends Error
  */
-class KonteinerNotRegisteredTagError extends Error {
+export default class KonteinerNotRegisteredTagError extends Error {
 
 	/**
 	 * @param {string} tagName
@@ -15,5 +15,3 @@ class KonteinerNotRegisteredTagError extends Error {
 		this.tag = tagName
 	}
 }
-
-module.exports = KonteinerNotRegisteredTagError

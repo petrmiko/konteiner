@@ -1,5 +1,5 @@
 // this file should be only loaded in konteiner.test.js
-module.exports = () => {
+export default () => {
 	return {
 		getValue() { return '{nestedValue}' }
 	}

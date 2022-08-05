@@ -14,7 +14,7 @@ This module provides you means to:
 	`npm i --save @petrmiko/konteiner@latest`
 - In JS code
 ```
-const Konteiner = require('@petrmiko/konteiner')
+import Konteiner from '@petrmiko/konteiner'
 
 const konteiner = new Konteiner()
 
@@ -36,7 +36,7 @@ messenger.sendMessage('Hello world!') // console.log will print out 'Hello world
 
 If you want to load all dependencies in an directory, you can also do following.
 ```
-const Konteiner = require('@petrmiko/konteiner')
+import Konteiner from '@petrmiko/konteiner'
 const konteiner = new Konteiner({exclude: [
 	'\\.test\\.' // all test files will be omitted from batch loading using .registerPath
 ]})
@@ -47,7 +47,7 @@ konteiner.registerPath('./src', {exclude: [
 ]}) // all but tests and index.js will be loaded. Overrides exclude from constructor for this call only
 
 // then in place of use we need to know, what dependency creator was used to retrieve its instance
-const Service = require('./src/service')
+import Service from './src/service'
 
 const someService = konteiner.get(Service) // all dependencies bound to Service will be now initialized
 ...
