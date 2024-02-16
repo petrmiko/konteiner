@@ -1,6 +1,6 @@
 {
   "name": "@petrmiko/konteiner",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Simple DI container for node.js applications",
   "main": "index.js",
   "repository": {
