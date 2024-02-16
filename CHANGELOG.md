@@ -2,6 +2,9 @@
 In this file will be described latest changes in Konteiner package.
 
 ## Unreleased
+- Added
+    - package audit fixes
+    - note that package is no longer maintained
 
 ## 2.1.0
 - Breaking

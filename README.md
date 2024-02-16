@@ -1,5 +1,8 @@
 # konteiner - simple zero-dependencies DI container for node.js apps
 
+> [!WARNING]  
+> This package is no longer maintained and will not receive further updates.
+
 [![Build Status](https://travis-ci.com/petrmiko/konteiner.svg?branch=master)](https://travis-ci.com/petrmiko/konteiner)
 [![Coverage Status](https://coveralls.io/repos/github/petrmiko/konteiner/badge.svg)](https://coveralls.io/github/petrmiko/konteiner)
 
